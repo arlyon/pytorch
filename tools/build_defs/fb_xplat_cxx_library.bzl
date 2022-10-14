@@ -5,6 +5,7 @@ load(
     ":buck_helpers.bzl",
     "filter_attributes",
 )
+load("@prelude//:rules.bzl", "cxx_library");
 
 def fb_xplat_cxx_library(
         name,

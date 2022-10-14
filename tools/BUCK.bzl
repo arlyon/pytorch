@@ -170,7 +170,7 @@ def define_tools_targets(
         # that is why we are selecting that OS to trigger this behavior.
         package_style = select({
             "DEFAULT": "inplace",
-            "ovr_config//os:linux-arm64": "standalone",
+            # "ovr_config//os:linux-arm64": "standalone",
         }),
         visibility = ["PUBLIC"],
         # Because Windows does not support inplace packaging, we need to
@@ -180,7 +180,7 @@ def define_tools_targets(
         # See note above about why the OS is Linux here and not Windows.
         zip_safe = select({
             "DEFAULT": True,
-            "ovr_config//os:linux-arm64": False,
+            # "ovr_config//os:linux-arm64": False,
         }),
         deps = [
             ":generate_code",
