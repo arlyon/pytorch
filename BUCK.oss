@@ -86,7 +86,7 @@ cxx_library(
     **get_pt_operator_registry_dict(
         name = "pt_ops_full",
         deps = [
-            ":torch_mobile_ops_full_dev",
+           # ":torch_mobile_ops_full_dev",
         ],
     )
 )

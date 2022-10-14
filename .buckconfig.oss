@@ -7,7 +7,14 @@
 
 [repositories]
   bazel_skylib = third_party/bazel-skylib/
-  ovr_config = .
+self = .
+ovr_config = prelude
+prelude = prelude
+toolchains = toolchains
+buck = no
+fbcode = no
+fbcode_macros = no
+fbsource = no
 
 [download]
   in_build = true
@@ -23,3 +30,9 @@
 
 [project]
   default_flavors_mode=all
+
+[build]
+execution_platforms = ovr_config//platforms:default
+
+[parser]
+target_platform_detector_spec = target://...->ovr_config//platforms:default

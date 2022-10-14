@@ -1,5 +1,4 @@
 load("//tools/build_defs:expect.bzl", "expect")
-load("//tools/build_defs:fb_xplat_genrule.bzl", "fb_xplat_genrule")
 load("//tools/build_defs:type_defs.bzl", "is_list", "is_string")
 
 # @lint-ignore BUCKRESTRICTEDSYNTAX
@@ -37,43 +36,43 @@ def pt_operator_library(
     labels = kwargs.pop("labels", [])
     visibility = kwargs.pop("visibility", ["PUBLIC"])
 
-    fb_xplat_genrule(
-        name = name,
-        out = "model_operators.yaml",
-        cmd = (
-            "$(exe {exe}) " +
-            "{optionally_root_ops} " +
-            "{optionally_training_root_ops} " +
-            "--rule_name {rule_name} " +
-            "--output_path \"${{OUT}}\" " +
-            "--model_name {model_name} " +
-            "--dep_graph_yaml_path {dep_graph_yaml} " +
-            "--models_yaml_path {models_yaml} " +
-            "{optionally_model_versions} " +
-            "{optionally_model_assets} " +
-            "{optionally_model_traced_backends} " +
-            "{optionally_include_all_operators}"
-        ).format(
-            exe = "//tools:gen_operators_yaml" if IS_OSS else "fbsource//xplat/caffe2/tools:gen_operators_yaml",
-            rule_name = name,
-            model_name = model_name,
-            dep_graph_yaml = "none" if IS_OSS else "$(location fbsource//xplat/caffe2:pytorch_op_deps)/fb/pytorch_op_deps.yaml ",
-            models_yaml = "none" if IS_OSS else "$(location fbsource//xplat/pytorch_models:all_mobile_model_configs)/build/all_mobile_model_configs.yaml ",
-            optionally_root_ops = "--root_ops " + (",".join(ops)) if len(ops) > 0 else "",
-            optionally_training_root_ops = "--training_root_ops " + (",".join(ops)) if len(ops) > 0 and train else "",
-            optionally_model_versions = "--model_versions " + (",".join(model_versions)) if model_versions != None else "",
-            optionally_model_assets = "--model_assets " + (",".join(model_assets)) if model_assets != None else "",
-            optionally_model_traced_backends = "--model_traced_backends " + (",".join(model_traced_backends)) if model_traced_backends != None else "",
-            optionally_include_all_operators = "--include_all_operators " if include_all_operators else "",
-        ),
-        labels = labels + [
-            "pt_operator_library",
-            "supermodule:android/default/pytorch",
-            "supermodule:ios/default/public.pytorch",
-        ] + (["pt_train_operator_library"] if train else []),
-        visibility = visibility,
-        **kwargs
-    )
+    # fb_xplat_genrule(
+    #     name = name,
+    #     out = "model_operators.yaml",
+    #     cmd = (
+    #         "$(exe {exe}) " +
+    #         "{optionally_root_ops} " +
+    #         "{optionally_training_root_ops} " +
+    #         "--rule_name {rule_name} " +
+    #         "--output_path \"${{OUT}}\" " +
+    #         "--model_name {model_name} " +
+    #         "--dep_graph_yaml_path {dep_graph_yaml} " +
+    #         "--models_yaml_path {models_yaml} " +
+    #         "{optionally_model_versions} " +
+    #         "{optionally_model_assets} " +
+    #         "{optionally_model_traced_backends} " +
+    #         "{optionally_include_all_operators}"
+    #     ).format(
+    #         exe = "//tools:gen_operators_yaml" if IS_OSS else "fbsource//xplat/caffe2/tools:gen_operators_yaml",
+    #         rule_name = name,
+    #         model_name = model_name,
+    #         dep_graph_yaml = "none" if IS_OSS else "$(location fbsource//xplat/caffe2:pytorch_op_deps)/fb/pytorch_op_deps.yaml ",
+    #         models_yaml = "none" if IS_OSS else "$(location fbsource//xplat/pytorch_models:all_mobile_model_configs)/build/all_mobile_model_configs.yaml ",
+    #         optionally_root_ops = "--root_ops " + (",".join(ops)) if len(ops) > 0 else "",
+    #         optionally_training_root_ops = "--training_root_ops " + (",".join(ops)) if len(ops) > 0 and train else "",
+    #         optionally_model_versions = "--model_versions " + (",".join(model_versions)) if model_versions != None else "",
+    #         optionally_model_assets = "--model_assets " + (",".join(model_assets)) if model_assets != None else "",
+    #         optionally_model_traced_backends = "--model_traced_backends " + (",".join(model_traced_backends)) if model_traced_backends != None else "",
+    #         optionally_include_all_operators = "--include_all_operators " if include_all_operators else "",
+    #     ),
+    #     labels = labels + [
+    #         "pt_operator_library",
+    #         "supermodule:android/default/pytorch",
+    #         "supermodule:ios/default/public.pytorch",
+    #     ] + (["pt_train_operator_library"] if train else []),
+    #     visibility = visibility,
+    #     **kwargs
+    # )
 
 def validate_and_extract_model_information(name, model):
     model_name = name
