@@ -1,11 +1,10 @@
-load("//tools/build_defs:fb_xplat_cxx_library.bzl", "fb_xplat_cxx_library")
-load("//tools/build_defs:fb_xplat_cxx_test.bzl", "fb_xplat_cxx_test")
+load("@prelude//:rules.bzl", "cxx_test", "cxx_library")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//tools/build_defs:platform_defs.bzl", "ANDROID", "APPLE", "APPLETVOS", "CXX", "IOS", "MACOSX")
 
 # Shared by internal and OSS BUCK
 def define_qnnpack(third_party, labels = []):
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_scalar",
         srcs = [
@@ -21,14 +20,9 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O2",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -38,10 +32,11 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("pthreadpool_header"),
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_sse2",
         srcs = [
@@ -82,17 +77,12 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O3",
             "-ffast-math",
             "-Wno-error=unused-variable",
             "-Wno-shadow",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -111,10 +101,11 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("pthreadpool_header"),
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_ssse3",
         srcs = [
@@ -128,17 +119,12 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O3",
             "-ffast-math",
             "-Wno-error=unused-variable",
             "-Wno-shadow",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -165,10 +151,11 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("pthreadpool_header"),
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_sse41",
         srcs = [
@@ -182,17 +169,12 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O3",
             "-ffast-math",
             "-Wno-error=unused-variable",
             "-Wno-shadow",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -219,10 +201,11 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("pthreadpool_header"),
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "qnnp_interface",
         headers = subdir_glob(
@@ -233,7 +216,6 @@ def define_qnnpack(third_party, labels = []):
             ],
         ),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
         ],
@@ -245,7 +227,7 @@ def define_qnnpack(third_party, labels = []):
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "pytorch_qnnpack",
         srcs = [
@@ -287,14 +269,9 @@ def define_qnnpack(third_party, labels = []):
             ("src", "qnnpack/*.h"),
             ("include", "*.h"),
         ]),
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O2",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = [
@@ -329,6 +306,8 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("pthreadpool_header"),
+            third_party("clog"),
         ],
         exported_deps = [
             third_party("cpuinfo"),
@@ -336,7 +315,7 @@ def define_qnnpack(third_party, labels = []):
     )
 
     # Only ukernels implemented in C with ARM NEON intrinsics
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_neon",
         srcs = [
@@ -381,17 +360,12 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O3",
             "-ffast-math",
             "-Wno-error=unused-variable",
             "-Wno-shadow",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -419,7 +393,7 @@ def define_qnnpack(third_party, labels = []):
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_asm",
         srcs = [
@@ -451,13 +425,8 @@ def define_qnnpack(third_party, labels = []):
             ("src", "requantization/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -497,7 +466,7 @@ def define_qnnpack(third_party, labels = []):
         visibility = ["PUBLIC"],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         # @autodeps-skip
         name = "ukernels_psimd",
         srcs = [
@@ -510,15 +479,10 @@ def define_qnnpack(third_party, labels = []):
             ("src", "qnnpack/*.h"),
         ]),
         header_namespace = "",
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = [
             "-O3",
             "-ffast-math",
             "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
-        ],
-        fbobjc_preprocessor_flags = [
-            "-DQNNP_PRIVATE=",
-            "-DQNNP_INTERNAL=",
         ],
         force_static = True,
         labels = labels,
@@ -544,15 +508,12 @@ def define_qnnpack(third_party, labels = []):
             third_party("FP16"),
             third_party("FXdiv"),
             third_party("psimd"),
+            third_party("pthreadpool_header"),
         ],
     )
 
-    fb_xplat_cxx_test(
-        # @autodeps-skip
-        fbandroid_use_instrumentation_test = True,
+    cxx_test(
         contacts = ["oncall+ai_infra_mobile_platform@xmail.facebook.com"],
-        platforms = (CXX, APPLE, ANDROID),
-        apple_sdks = (IOS, MACOSX),
         name = "pytorch_qnnpack_test",
         srcs = [
             "test/add.cc",
@@ -642,5 +603,7 @@ def define_qnnpack(third_party, labels = []):
             third_party("cpuinfo"),
             third_party("FP16"),
             third_party("pthreadpool"),
+            third_party("gtest"),
+            third_party("clog"),
         ],
     )
