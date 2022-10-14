@@ -2,17 +2,17 @@ load("//arvr/tools/build_defs:genrule_utils.bzl", "gen_cmake_header")
 load("//arvr/tools/build_defs:oxx.bzl", "oxx_static_library")
 
 cpu_supported_platforms = [
-    "ovr_config//os:android",
-    "ovr_config//os:iphoneos",
-    "ovr_config//os:linux-x86_64",
-    "ovr_config//os:macos",
-    "ovr_config//os:windows-x86_64",
-    "ovr_config//runtime:arm64-linux-ubuntu-neon",
+    # "ovr_config//os:android",
+    # "ovr_config//os:iphoneos",
+    # "ovr_config//os:linux-x86_64",
+    # "ovr_config//os:macos",
+    # "ovr_config//os:windows-x86_64",
+    # "ovr_config//runtime:arm64-linux-ubuntu-neon",
 ]
 
 cuda_supported_platforms = [
-    "ovr_config//os:linux-cuda",
-    "ovr_config//os:windows-cuda",
+    # "ovr_config//os:linux-cuda",
+    # "ovr_config//os:windows-cuda",
 ]
 
 def define_c10_ovrsource(name, is_mobile):
@@ -32,15 +32,15 @@ def define_c10_ovrsource(name, is_mobile):
         compatible_with = cpu_supported_platforms,
         compiler_flags = select({
             "DEFAULT": [],
-            "ovr_config//compiler:cl": [
-                "/w",
-            ],
-            "ovr_config//toolchain/clang:win": [
-                "-Wno-error",
-                "-Wno-shadow",
-                "-Wno-undef",
-                "-Wno-unused-variable",
-            ],
+            # "ovr_config//compiler:cl": [
+            #     "/w",
+            # ],
+            # "ovr_config//toolchain/clang:win": [
+            #     "-Wno-error",
+            #     "-Wno-shadow",
+            #     "-Wno-undef",
+            #     "-Wno-unused-variable",
+            # ],
         }),
         include_directories = [".."],
         preprocessor_flags = [
@@ -67,9 +67,9 @@ def define_c10_ovrsource(name, is_mobile):
         ],
         deps = select({
             "DEFAULT": [],
-            "ovr_config//os:linux": [
-                "//third-party/numactl:numactl",
-            ],
+            # "ovr_config//os:linux": [
+            #     "//third-party/numactl:numactl",
+            # ],
         }),
         exported_deps = [
             ":ovrsource_c10_cmake_macros.h",
@@ -133,18 +133,18 @@ def define_ovrsource_targets():
     oxx_static_library(
         name = "ovrsource_c10_cmake_macros.h",
         compatible_with = [
-            "ovr_config//os:android",
-            "ovr_config//os:iphoneos",
-            "ovr_config//os:linux",
-            "ovr_config//os:macos",
-            "ovr_config//os:windows",
+            # "ovr_config//os:android",
+            # "ovr_config//os:iphoneos",
+            # "ovr_config//os:linux",
+            # "ovr_config//os:macos",
+            # "ovr_config//os:windows",
         ],
         deps = select({
-            "ovr_config//os:android": [":ovrsource_c10_mobile_cmake_macros.h"],
-            "ovr_config//os:iphoneos": [":ovrsource_c10_mobile_cmake_macros.h"],
-            "ovr_config//os:linux": [":ovrsource_c10_non_mobile_cmake_macros.h"],
-            "ovr_config//os:macos": [":ovrsource_c10_non_mobile_cmake_macros.h"],
-            "ovr_config//os:windows": [":ovrsource_c10_non_mobile_cmake_macros.h"],
+            # "ovr_config//os:android": [":ovrsource_c10_mobile_cmake_macros.h"],
+            # "ovr_config//os:iphoneos": [":ovrsource_c10_mobile_cmake_macros.h"],
+            # "ovr_config//os:linux": [":ovrsource_c10_non_mobile_cmake_macros.h"],
+            # "ovr_config//os:macos": [":ovrsource_c10_non_mobile_cmake_macros.h"],
+            # "ovr_config//os:windows": [":ovrsource_c10_non_mobile_cmake_macros.h"],
         }),
     )
 
@@ -162,8 +162,8 @@ def define_ovrsource_targets():
         compatible_with = cpu_supported_platforms,
         exported_deps = select({
             "DEFAULT": [":c10_full_ovrsource"],
-            "ovr_config//os:android": [":c10_mobile_ovrsource"],
-            "ovr_config//os:iphoneos": [":c10_mobile_ovrsource"],
+            # "ovr_config//os:android": [":c10_mobile_ovrsource"],
+            # "ovr_config//os:iphoneos": [":c10_mobile_ovrsource"],
         }),
         visibility = ["PUBLIC"],
     )
@@ -183,15 +183,15 @@ def define_ovrsource_targets():
         compatible_with = cuda_supported_platforms,
         compiler_flags = select({
             "DEFAULT": [],
-            "ovr_config//compiler:cl": [
-                "/w",
-            ],
-            "ovr_config//toolchain/clang:win": [
-                "-Wno-error",
-                "-Wno-shadow",
-                "-Wno-undef",
-                "-Wno-unused-variable",
-            ],
+            # "ovr_config//compiler:cl": [
+            #     "/w",
+            # ],
+            # "ovr_config//toolchain/clang:win": [
+            #     "-Wno-error",
+            #     "-Wno-shadow",
+            #     "-Wno-undef",
+            #     "-Wno-unused-variable",
+            # ],
         }),
         link_whole = True,
         preprocessor_flags = [

@@ -13,6 +13,7 @@ cxx_library(
       deps = [
         "//third_party:fmt",
         "//third_party:glog",
+        "//third_party:glog_config",
     ],
     exported_deps = [],
     compiler_flags = [
