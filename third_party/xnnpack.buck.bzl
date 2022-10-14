@@ -233,6 +233,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":interface",
             third_party("FP16"),
             third_party("FXdiv"),
+            third_party("clog"),
         ],
     )
 
@@ -279,6 +280,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS + ["-msse"],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -316,6 +318,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_SSE_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -363,6 +366,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -401,6 +405,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -448,6 +453,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -486,6 +492,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -533,6 +540,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -571,6 +579,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -618,6 +627,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS + ["-mavx"],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -656,6 +666,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_AVX_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -704,6 +715,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS + ["-mf16c"],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -743,6 +755,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_F16C_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -790,6 +803,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS + ["-mxop"],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -828,6 +842,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_XOP_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -883,6 +898,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         ],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -929,6 +945,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_FMA3_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -988,6 +1005,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         ],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1038,6 +1056,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_AVX2_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1085,6 +1104,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS + ["-mavx512f"],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1123,6 +1143,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_AVX512F_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1190,6 +1211,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         ],
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1248,6 +1270,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_srcs = PROD_AVX512SKX_MICROKERNEL_SRCS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1288,6 +1311,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1326,6 +1350,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1363,6 +1388,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         windows_compiler_flags_override = WINDOWS_FLAGS,
         deps = [
             ":interface",
+            third_party("clog"),
         ],
     )
 
@@ -1417,6 +1443,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1469,6 +1496,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1507,6 +1535,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1545,6 +1574,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1586,6 +1616,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         deps = [
             ":interface",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1628,6 +1659,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":interface",
             ":jit_memory",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1667,6 +1699,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":interface",
             ":jit_memory",
             third_party("FP16"),
+            third_party("clog"),
         ],
     )
 
@@ -1686,6 +1719,8 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_neon_fp16",
             ":ukernels_neon_fp16arith_aarch64",
             ":ukernels_neon_v8",
+
+            third_party("clog"),
         ],
     )
 
@@ -1707,6 +1742,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_sse41",
             ":ukernels_ssse3",
             ":ukernels_xop",
+            third_party("clog"),
         ],
     )
 
@@ -1728,6 +1764,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_sse_ovr_win32",
             ":ukernels_ssse3_ovr_win32",
             ":ukernels_xop_ovr_win32",
+            third_party("clog"),
         ],
     )
 
@@ -1749,6 +1786,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_neon_fp16arith_aarch64",
             ":ukernels_neon_v8",
             ":ukernels_scalar_aarch32",
+            third_party("clog"),
         ],
     )
 
@@ -1766,6 +1804,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_neon_fma",
             ":ukernels_neon_v8",
             ":ukernels_scalar_aarch32",
+            third_party("clog"),
         ],
     )
 
@@ -1780,19 +1819,21 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
             ":ukernels_scalar",
             third_party("cpuinfo"),
             third_party("pthreadpool"),
+            third_party("clog"),
+            third_party("FP16"),
         ] + select({
             "DEFAULT": [
                 ":arm_lib",
                 ":x86_and_x86_64_lib",
             ],
-            "ovr_config//os:windows": [":x86_and_x86_64_lib_ovr_win32"] if XNNPACK_WINDOWS_AVX512F_ENABLED else [
-                ":arm_lib",
-                ":x86_and_x86_64_lib",
-            ],
+            # "ovr_config//os:windows": [":x86_and_x86_64_lib_ovr_win32"] if XNNPACK_WINDOWS_AVX512F_ENABLED else [
+            #     ":arm_lib",
+            #     ":x86_and_x86_64_lib",
+            # ],
             # doesn't cover iphonesimulator-x86_64
-            "ovr_config//runtime:arm64-linux-ubuntu-neon": [":arm64_lib"],
-            "ovr_config//runtime:platform009": [":x86_and_x86_64_lib"],
-            "ovr_config//runtime:platform010": [":x86_and_x86_64_lib"],
+            # "ovr_config//runtime:arm64-linux-ubuntu-neon": [":arm64_lib"],
+            # "ovr_config//runtime:platform009": [":x86_and_x86_64_lib"],
+            # "ovr_config//runtime:platform010": [":x86_and_x86_64_lib"],
         }),
         exported_headers = {
             "xnnpack.h": "XNNPACK/include/xnnpack.h",

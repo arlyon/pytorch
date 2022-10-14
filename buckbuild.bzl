@@ -2,9 +2,7 @@
 # These load paths point to different files in internal and OSS environment
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("//tools/build_defs:fb_native_wrapper.bzl", "fb_native")
-load("//tools/build_defs:fb_xplat_cxx_library.bzl", "fb_xplat_cxx_library")
-load("//tools/build_defs:fb_xplat_genrule.bzl", "fb_xplat_genrule")
+load("@prelude//:rules.bzl", "genrule", "filegroup", "cxx_library")
 load("//tools/build_defs:fbsource_utils.bzl", "is_arvr_mode")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//tools/build_defs:platform_defs.bzl", "APPLETVOS", "IOS", "MACOSX")
@@ -156,7 +154,7 @@ def get_pt_compiler_flags():
         "DEFAULT": _PT_COMPILER_FLAGS + [
             "-std=gnu++17",  #to accomodate for eigen
         ],
-        "ovr_config//compiler:cl": windows_convert_gcc_clang_flags(_PT_COMPILER_FLAGS),
+        # "ovr_config//compiler:cl": windows_convert_gcc_clang_flags(_PT_COMPILER_FLAGS),
     })
 
 _PT_COMPILER_FLAGS = [
@@ -420,7 +418,7 @@ def gen_aten_files(
         backends = static_dispatch_backend
     else:
         backends = enabled_backends
-    fb_xplat_genrule(
+    genrule(
         name = name,
         default_outs = ["."],
         outs = get_aten_generated_files(backends),
@@ -430,7 +428,6 @@ def gen_aten_files(
         ] + extra_params),
         visibility = visibility,
         compatible_with = compatible_with,
-        apple_sdks = apple_sdks,
     )
 
 def gen_aten_unboxing_files(
@@ -446,7 +443,7 @@ def gen_aten_unboxing_files(
         extra_params.append("--op_registration_allowlist")
         extra_params.append(op_registration_allowlist)
 
-    fb_xplat_genrule(
+    genrule(
         name = genrule_name,
         default_outs = ["."],
         outs = get_unboxing_generated_files(),
@@ -501,13 +498,12 @@ def copy_template_registration_files(name, apple_sdks = None):
         cmd.append("cp -f " + pvd_batch_box_cox_file + " $OUT")
         cmd_exe.append("copy " + pvd_batch_box_cox_file + " $OUT")
 
-    fb_xplat_genrule(
+    genrule(
         name = name,
         cmd = " && ".join(cmd),
         cmd_exe = "@powershell -Command " + ("; ".join(cmd_exe)),
         outs = get_template_registration_files_outs(IS_OSS),
         default_outs = ["."],
-        apple_sdks = apple_sdks,
     )
 
 def get_feature_tracer_source_list():
@@ -531,7 +527,7 @@ def pt_operator_query_codegen(
     oplist_dir_name = name + "_pt_oplist"
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    genrule(
         name = oplist_dir_name,
         cmd = ("$(exe {}tools:gen_oplist) ".format(ROOT_PATH) +
                "--model_file_list_path $(@query_outputs 'attrfilter(labels, pt_operator_library, deps(set({deps})))') " +
@@ -633,7 +629,7 @@ def pt_operator_query_codegen(
     return {"headers": headers, "srcs": srcs}
 
 def gen_aten_libtorch_files(name, extra_params = [], compatible_with = [], apple_sdks = None):
-    fb_xplat_genrule(
+    genrule(
         name = name,
         outs = get_generate_code_bin_outs(),
         default_outs = ["."],
@@ -658,7 +654,6 @@ def gen_aten_libtorch_files(name, extra_params = [], compatible_with = [], apple
             ] + extra_params,
         ),
         compatible_with = compatible_with,
-        apple_sdks = apple_sdks,
     )
 
 def copy_metal(name, apple_sdks = None):
@@ -692,7 +687,7 @@ def copy_metal(name, apple_sdks = None):
     cmd.append("cp -f " + unet_metal_prepack_file + "/unet_metal_prepack.cpp" + " $OUT")
     cmd.append("cp -f " + unet_metal_prepack_file + "/unet_metal_prepack.mm" + " $OUT")
 
-    fb_xplat_genrule(
+    genrule(
         name = name,
         cmd = " && ".join(cmd),
         cmd_exe = "@powershell -Command " + ("; ".join(cmd_exe)),
@@ -700,8 +695,8 @@ def copy_metal(name, apple_sdks = None):
         # so we just exclude those targets from being copied for those platforms (They end up uncompiled anyway).
         outs = select({
             "DEFAULT": get_metal_registration_files_outs(),
-            "ovr_config//os:android": get_metal_registration_files_outs_windows(),
-            "ovr_config//os:windows": get_metal_registration_files_outs_windows(),
+            # "ovr_config//os:android": get_metal_registration_files_outs_windows(),
+            # "ovr_config//os:windows": get_metal_registration_files_outs_windows(),
         }),
         default_outs = ["."],
         apple_sdks = apple_sdks,
@@ -754,6 +749,10 @@ def get_pt_operator_registry_dict(
                    ROOT + ":aten_cpu",
                    ROOT + ":aten_metal_prepack_header",
                    third_party("glog"),
+                   third_party("XNNPACK"),
+                   third_party("pocketfft"),
+                   third_party("clog"),
+                   third_party("FP16"),
                    C10,
                ] + ([ROOT + ":torch_mobile_train"] if train else []) +
                ([ROOT + ":flatbuffers_mobile"] if enable_flatbuffer else []),
@@ -763,11 +762,11 @@ def get_pt_operator_registry_dict(
 # these targets are shared by internal and OSS BUCK
 def define_buck_targets(
         aten_default_args = dict(),
-        pt_xplat_cxx_library = fb_xplat_cxx_library,
+        pt_xplat_cxx_library = cxx_library,
         c2_fbandroid_xplat_compiler_flags = [],
         labels = []):
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "metal_build_srcs",
         # @lint-ignore BUCKRESTRICTEDSYNTAX
         srcs = glob(METAL_SOURCE_LIST),
@@ -777,7 +776,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "templated_selective_build_srcs",
         # NB: no glob here, there are generated targets in this list!
         # @lint-ignore BUCKRESTRICTEDSYNTAX
@@ -787,7 +786,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "th_header",
         header_namespace = "",
         exported_headers = subdir_glob([
@@ -809,7 +808,7 @@ def define_buck_targets(
         labels = labels,
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "aten_header",
         header_namespace = "",
         exported_headers = subdir_glob([
@@ -849,7 +848,7 @@ def define_buck_targets(
         labels = labels,
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "aten_vulkan_header",
         header_namespace = "",
         exported_headers = subdir_glob([
@@ -862,14 +861,14 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "jit_core_headers",
         header_namespace = "",
         exported_headers = subdir_glob([("", x) for x in jit_core_headers]),
         labels = labels,
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "torch_headers",
         header_namespace = "",
         exported_headers = subdir_glob(
@@ -901,7 +900,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "aten_test_header",
         header_namespace = "",
         exported_headers = subdir_glob([
@@ -909,7 +908,7 @@ def define_buck_targets(
         ]),
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "aten_metal_prepack_header",
         header_namespace = "",
         exported_headers = subdir_glob([
@@ -919,7 +918,7 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "torch_mobile_headers",
         header_namespace = "",
         exported_headers = subdir_glob(
@@ -931,7 +930,7 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "generated_aten_config_header",
         header_namespace = "ATen",
         exported_headers = {
@@ -940,7 +939,7 @@ def define_buck_targets(
         labels = labels,
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "generated-autograd-headers",
         header_namespace = "torch/csrc/autograd/generated",
         exported_headers = {
@@ -954,7 +953,7 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "generated-version-header",
         header_namespace = "torch",
         exported_headers = {
@@ -964,7 +963,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    genrule(
         name = "generate-version-header",
         srcs = [
             "torch/csrc/api/include/torch/version.h.in",
@@ -985,7 +984,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "aten_src_path",
         srcs = [
             "aten/src/ATen/native/native_functions.yaml",
@@ -997,18 +996,16 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "common_core",
         srcs = [
             "caffe2/core/common.cc",
         ],
-        apple_sdks = (IOS, MACOSX, APPLETVOS),
         compiler_flags = get_pt_compiler_flags(),
         labels = labels,
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
         visibility = ["PUBLIC"],
-        windows_preferred_linkage = "static" if is_arvr_mode() else None,
         deps = [
             ":caffe2_headers",
             C10,
@@ -1016,7 +1013,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    genrule(
         name = "generate_aten_config",
         srcs = [
             "aten/src/ATen/Config.h.in",
@@ -1090,7 +1087,7 @@ def define_buck_targets(
         extra_params = get_jit_codegen_params(),
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "generated_aten_headers_cpu",
         header_namespace = "ATen",
         exported_headers = get_aten_static_dispatch_backend_headers({
@@ -1118,7 +1115,7 @@ def define_buck_targets(
         labels = labels,
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "torch_mobile_observer",
         srcs = [
             "torch/csrc/jit/mobile/observer.cpp",
@@ -1133,9 +1130,6 @@ def define_buck_targets(
                 ("", "torch/fb/observers/MobileObserverUtil.h"),
             ]),
         ),
-        fbobjc_compiler_flags = [
-            "-Wno-missing-prototypes",
-        ],
         labels = labels,
         visibility = ["PUBLIC"],
         deps = [
@@ -1144,7 +1138,7 @@ def define_buck_targets(
     )
 
     # Base library shared by lite-interpreter and full-jit.
-    pt_xplat_cxx_library(
+    cxx_library(
         name = "torch_common",
         srcs = core_sources_common,
         compiler_flags = get_pt_compiler_flags(),
@@ -1177,9 +1171,6 @@ def define_buck_targets(
         ],
         compiler_flags = get_pt_compiler_flags(),
         exported_preprocessor_flags = get_pt_preprocessor_flags(),
-        extra_flags = {
-            "fbandroid_compiler_flags": ["-frtti"],
-        },
         # torch_mobile_deserialize brings in sources neccessary to read a module
         # which depends on mobile module definition
         # link_whole is enable so that all symbols neccessary for mobile module are compiled
@@ -1214,9 +1205,6 @@ def define_buck_targets(
         ],
         compiler_flags = get_pt_compiler_flags(),
         exported_preprocessor_flags = get_pt_preprocessor_flags() + (["-DSYMBOLICATE_MOBILE_DEBUG_HANDLE"] if get_enable_eager_symbolication() else []),
-        extra_flags = {
-            "fbandroid_compiler_flags": ["-frtti"],
-        },
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
         linker_flags = [
@@ -1404,6 +1392,7 @@ def define_buck_targets(
             ":torch_mobile_deserialize",
             third_party("glog"),
             third_party("rt"),
+            third_party("XNNPACK"),
             C10,
         ] + ([] if IS_OSS else [
             "//xplat/caffe2/fb/custom_ops/batch_box_cox:batch_box_cox",
@@ -1521,7 +1510,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "torch_mobile_compatibility",
         srcs = [
             # These .cpp brought in through core_sources_common
@@ -1638,14 +1627,13 @@ def define_buck_targets(
         ]),
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "backend_interface_lib",
         srcs = [
             "torch/csrc/jit/backends/backend_debug_info.cpp",
             "torch/csrc/jit/backends/backend_interface.cpp",
         ],
         compiler_flags = get_pt_compiler_flags(),
-        fbandroid_compiler_flags = c2_fbandroid_xplat_compiler_flags,
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
         linker_flags = [
@@ -1705,7 +1693,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_genrule(
+    genrule(
         name = "mobile_bytecode_header",
         srcs = [
             "torch/csrc/jit/serialization/mobile_bytecode.fbs",
@@ -1723,7 +1711,7 @@ def define_buck_targets(
 
     # Users of this target will need to add third_party("flatbuffers-api") as a
     # dep.
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "mobile_bytecode",
         header_namespace = "",
         exported_headers = {
@@ -1742,7 +1730,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "flatbuffers_serializer_mobile",
         srcs = ["torch/csrc/jit/serialization/flatbuffer_serializer.cpp"],
         exported_headers = [
@@ -1754,7 +1742,7 @@ def define_buck_targets(
             "-fexceptions",
             "-frtti",
             "-Wno-deprecated-declarations",
-        ] + (["-DFB_XPLAT_BUILD"] if not IS_OSS else []),
+        ] + (["-DBUILD"] if not IS_OSS else []),
         visibility = ["PUBLIC"],
         deps = [
             ":mobile_bytecode",
@@ -1766,7 +1754,7 @@ def define_buck_targets(
         ],
     )
 
-    pt_xplat_cxx_library(
+    cxx_library(
         name = "flatbuffer_loader",
         srcs = [
             "torch/csrc/jit/mobile/flatbuffer_loader.cpp",
@@ -1780,10 +1768,7 @@ def define_buck_targets(
             # Need this otherwise USE_KINETO is undefed
             # for mobile
             "-DEDGE_PROFILER_USE_KINETO",
-        ] + (["-DFB_XPLAT_BUILD"] if not IS_OSS else []),
-        extra_flags = {
-            "fbandroid_compiler_flags": ["-frtti"],
-        },
+        ] + (["-DBUILD"] if not IS_OSS else []),
         # torch_mobile_deserialize brings in sources neccessary to read a module
         # which depends on mobile module definition
         # link_whole is enable so that all symbols neccessary for mobile module are compiled
@@ -1804,7 +1789,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "flatbuffers_serializer_jit",
         srcs = ["torch/csrc/jit/serialization/flatbuffer_serializer_jit.cpp"],
         exported_headers = [
@@ -1830,7 +1815,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "flatbuffers_jit",
         visibility = ["PUBLIC"],
         exported_deps = [
@@ -1840,7 +1825,7 @@ def define_buck_targets(
         ],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "flatbuffers_mobile",
         visibility = ["PUBLIC"],
         exported_deps = [
@@ -1871,7 +1856,7 @@ def define_buck_targets(
         ] if NOT_OSS else [],
     )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "static_runtime",
         srcs = [
             "torch/csrc/jit/runtime/static/fusion.cpp",
@@ -1888,7 +1873,6 @@ def define_buck_targets(
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
         visibility = ["PUBLIC"],
-        windows_preferred_linkage = "static" if is_arvr_mode() else None,
         deps = [
             ":aten_cpu",
             ":caffe2_headers",
@@ -1914,7 +1898,7 @@ def define_buck_targets(
         ]),
         ("aten_native_cpu", aten_native_source_list),
     ]:
-        fb_xplat_cxx_library(
+        cxx_library(
             name = name,
             srcs = srcs,
             header_namespace = "",
@@ -1924,6 +1908,8 @@ def define_buck_targets(
             deps = [
                 third_party("omp"),
                 third_party("cpuinfo"),
+                third_party("clog"),
+                third_party("FP16"),
                 third_party("glog"),
                 third_party("XNNPACK"),
                 third_party("pocketfft"),
@@ -1947,7 +1933,7 @@ def define_buck_targets(
             **aten_default_args
         )
 
-    fb_xplat_cxx_library(
+    cxx_library(
         name = "lean_runtime_with_flatbuffer",
         srcs = [
             "aten/src/ATen/core/DeprecatedTypePropertiesRegistry.cpp",
@@ -1986,10 +1972,10 @@ def define_buck_targets(
         ),
         compiler_flags = get_pt_compiler_flags() + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-fdata-sections",
-                "-ffunction-sections",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-fdata-sections",
+            #     "-ffunction-sections",
+            # ],
         }),
         exported_preprocessor_flags = get_pt_preprocessor_flags() + [
             "-DMIN_EDGE_RUNTIME",
@@ -1998,12 +1984,12 @@ def define_buck_targets(
             "-Wl,--no-as-needed",
         ] + select({
             "DEFAULT": [],
-            "ovr_config//os:macos": [
-                "-dead_strip",
-            ],
-            "ovr_config//os:xtensa-xos": [
-                "-Wl,--gc-sections",
-            ],
+            # "ovr_config//os:macos": [
+            #     "-dead_strip",
+            # ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-Wl,--gc-sections",
+            # ],
         }),
         visibility = ["PUBLIC"],
         exported_deps = [
@@ -2032,16 +2018,16 @@ def define_buck_targets(
         ],
         compiler_flags = get_pt_compiler_flags() + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-fdata-sections",
-                "-ffunction-sections",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-fdata-sections",
+            #     "-ffunction-sections",
+            # ],
         }),
         exported_preprocessor_flags = get_pt_preprocessor_flags() + ["-DMIN_EDGE_RUNTIME"] + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-Dthread_local=",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-Dthread_local=",
+            # ],
         }),
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
@@ -2095,16 +2081,16 @@ def define_buck_targets(
         ],
         compiler_flags = get_pt_compiler_flags() + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-fdata-sections",
-                "-ffunction-sections",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-fdata-sections",
+            #     "-ffunction-sections",
+            # ],
         }),
         exported_preprocessor_flags = get_pt_preprocessor_flags() + ["-DMIN_EDGE_RUNTIME"] + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-Dthread_local=",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-Dthread_local=",
+            # ],
         }),
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
@@ -2155,17 +2141,17 @@ def define_buck_targets(
         ],
         compiler_flags = get_pt_compiler_flags() + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-fexceptions",
-                "-fdata-sections",
-                "-ffunction-sections",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-fexceptions",
+            #     "-fdata-sections",
+            #     "-ffunction-sections",
+            # ],
         }),
         exported_preprocessor_flags = get_pt_preprocessor_flags() + ["-DMIN_EDGE_RUNTIME"] + select({
             "DEFAULT": [],
-            "ovr_config//os:xtensa-xos": [
-                "-Dthread_local=",
-            ],
+            # "ovr_config//os:xtensa-xos": [
+            #     "-Dthread_local=",
+            # ],
         }),
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
