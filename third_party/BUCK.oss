@@ -206,16 +206,13 @@ cxx_library(
 
 cxx_library(
     name = "clog",
+    header_namespace = "",
     srcs = [
         "cpuinfo/deps/clog/src/clog.c",
     ],
-    raw_headers = glob([
-        "cpuinfo/deps/clog/include/*.h",
+    exported_headers = subdir_glob([
+        ("cpuinfo/deps/clog/include", "*.h"),
     ]),
-    public_include_directories = [
-        "cpuinfo/deps/clog/include/",
-    ],
-    force_static = True,
     visibility = ["PUBLIC"],
 )
 
