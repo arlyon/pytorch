@@ -140,6 +140,7 @@ THIRD_PARTY_LIBS = {
     "kineto": ["//xplat/kineto/libkineto:libkineto", "//third_party:libkineto"],
     "libkineto_headers": ["//xplat/kineto/libkineto:libkineto_headers", "//third_party:libkineto_headers"],
     "omp": ["//xplat/third-party/linker_lib:omp", "//third_party:no-op"],
+    "pybind": [None, "//third_party:pybind"],
     "python_headers": [None, "//third_party:python_headers"],
     "pocketfft": ["//third-party/pocket_fft:pocketfft", "//third_party:pocketfft_header"],
     "psimd": ["//xplat/third-party/psimd:psimd", "//third_party:psimd"],
