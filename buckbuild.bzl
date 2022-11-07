@@ -2,9 +2,7 @@
 # These load paths point to different files in internal and OSS environment
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("//tools/build_defs:fb_native_wrapper.bzl", "fb_native")
-load("//tools/build_defs:fb_xplat_cxx_library.bzl", "fb_xplat_cxx_library")
-load("//tools/build_defs:fb_xplat_genrule.bzl", "fb_xplat_genrule")
+load("@prelude//:rules.bzl", "genrule", "filegroup", "cxx_library", "cxx_binary")
 load("//tools/build_defs:fbsource_utils.bzl", "is_arvr_mode")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//tools/build_defs:platform_defs.bzl", "APPLETVOS", "IOS", "MACOSX")
@@ -156,6 +154,43 @@ def third_party(name):
     if name not in THIRD_PARTY_LIBS:
         fail("Cannot find third party library " + name + ", please register it in THIRD_PARTY_LIBS first!")
     return THIRD_PARTY_LIBS[name][1] if IS_OSS else THIRD_PARTY_LIBS[name][0]
+
+
+PYBIND_COPTS = [
+    "-fexceptions",
+]
+
+PYBIND_FEATURES = [
+    "-use_header_modules",  # Required for pybind11.
+    "-parse_headers",
+]
+
+PYBIND_DEPS = [
+    third_party("pybind"),
+    third_party("python_headers"),
+]
+
+# Builds a Python extension module using pybind11.
+# This can be directly used in python with the import statement.
+# This adds rules for a .so binary file.
+def pybind_extension(
+        name,
+        copts = [],
+        features = [],
+        linkopts = [],
+        tags = [],
+        deps = [],
+        **kwargs):
+
+    cxx_binary(
+        name = name + ".so",
+        compiler_flags = copts + PYBIND_COPTS + ["-fvisibility=hidden"],
+        # features = features + PYBIND_FEATURES,
+        # linkopts = linkopts,
+        # tags = tags,
+        deps = deps + PYBIND_DEPS,
+        **kwargs
+    )
 
 def get_pt_compiler_flags():
     return select({
