@@ -8,6 +8,11 @@ load(":buckbuild.bzl",
     "get_pt_operator_registry_dict",
 )
 
+load(
+    ":build_variables.bzl",
+    "libtorch_python_core_sources",
+)
+
 # define shared buck targets
 define_buck_targets()
 
@@ -101,6 +106,33 @@ cxx_library(
     ],
 )
 
+cxx_library(
+    name = "torch_python",
+    srcs = libtorch_python_core_sources,
+    headers = subdir_glob([
+        ("", "torch/csrc/utils/*.h")
+    ]
+    #     "torch/csrc/onnx/init.h"
+    ),
+    deps = [
+        third_party("pybind"),
+        third_party("python_headers"),
+        ":torch",
+        ":caffe2_serialize",
+        ":shm",
+        "//third_party:libkineto",
+    ],
+    exported_deps = [
+        ":generated-autograd-headers",
+        ":caffe2_headers",
+        ":aten_header",
+        ":aten_cpu",
+        ":aten_native_cpu",
+        ":torch_headers",
+        "//aten/src/ATen/native/quantized/cpu/qnnpack:pytorch_qnnpack",
+        "//c10:c10",
+    ]
+)
 cxx_binary(
     name = 'ptmobile_benchmark',
     srcs = [
