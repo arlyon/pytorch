@@ -3,6 +3,7 @@ load("//third_party:xnnpack.buck.bzl", "define_xnnpack")
 load("//third_party:onnx.buck.bzl", "define_onnx")
 load("//third_party:protobuf.buck.bzl", "define_protobuf")
 load("//third_party:kineto.buck.bzl", "define_kineto")
+load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//:buckbuild.bzl", "third_party")
 
 define_glog()
@@ -30,6 +31,31 @@ cxx_library(
     exported_preprocessor_flags = [
         "-isystem{}".format("/usr/include/python3.10"),
     ],
+    visibility = ["PUBLIC"],
+)
+
+cxx_library(
+    name = "pybind",
+    exported_headers = subdir_glob(
+        [
+            ("pybind11/include", "pybind11/*.h"),
+            ("pybind11/include", "pybind11/detail/*.h"),
+        ],
+        exclude = [
+            # Deprecated file that just emits a warning
+            "pybind11/include/pybind11/common.h",
+        ]
+    ),
+    header_namespace = "",
+    srcs = ["pybind11/stub.cpp"],
+    compiler_flags =  [
+        "-fexceptions",
+        # Useless warnings
+        "-Xclang-only=-Wno-undefined-inline",
+        "-Xclang-only=-Wno-pragma-once-outside-header",
+        "-Xgcc-only=-Wno-error",  # no way to just disable the pragma-once warning in gcc
+    ],
+    deps = ["//third_party:python_headers"],
     visibility = ["PUBLIC"],
 )
 
