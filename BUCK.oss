@@ -74,13 +74,17 @@ cxx_library(
         "caffe2/serialize/inline_container.cc",
         "caffe2/serialize/istream_adapter.cc",
         "caffe2/serialize/read_adapter_interface.cc",
+        "caffe2/perfkernels/fused_8bit_rowwise_embedding_lookup_idx.cc",
+        "caffe2/perfkernels/embedding_lookup_idx_avx2.cc",
     ],
     visibility = ["PUBLIC"],
     deps = [
         ":caffe2_headers",
         "//third_party:glog",
+        "//third_party:protobuf",
         "//c10:c10",
         "//third_party:miniz",
+        "//third_party:cpuinfo",
     ],
     compiler_flags = [
         "-mavx",
@@ -181,6 +185,12 @@ cxx_binary(
     deps = [
         ":torch_mobile_core",
         ":pt_ops_full",
+        ":torch_headers",
+        ":generated-autograd-headers",
+        ":torch",
+            third_party("XNNPACK"),
+            "//third_party:tables",
+            "//third_party:fmt",
         "//c10:c10",
     ],
 )

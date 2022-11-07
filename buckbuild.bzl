@@ -15,6 +15,9 @@ load(
     "aten_cpu_source_list",
     "aten_native_source_list",
     "core_sources_common",
+    "core_sources_full",
+    "lazy_tensor_core_sources",
+    "torch_unpickler_common",
     "core_sources_full_mobile_no_backend_interface",
     "core_trainer_sources",
     "jit_core_headers",
@@ -22,6 +25,7 @@ load(
     "libtorch_profiler_sources",
     "torch_cpp_srcs",
     "torch_mobile_tracer_sources",
+    "libtorch_core_sources", "torch_cpp_srcs", "libtorch_core_jit_sources"
 )
 load(
     ":pt_ops.bzl",
@@ -131,6 +135,8 @@ THIRD_PARTY_LIBS = {
     "glog": ["//third-party/glog:glog", "//third_party:glog"],
     "gmock": ["//xplat/third-party/gmock:gtest", "//third_party:gmock"],
     "gtest": ["//xplat/third-party/gmock:gmock", "//third_party:gtest"],
+    "pybind": [None, "//third_party:pybind"],
+    "python_headers": [None, "//third_party:python_headers"],
     "kineto": ["//xplat/kineto/libkineto:libkineto", "//third_party:libkineto"],
     "libkineto_headers": ["//xplat/kineto/libkineto:libkineto_headers", "//third_party:libkineto_headers"],
     "omp": ["//xplat/third-party/linker_lib:omp", "//third_party:no-op"],
@@ -793,6 +799,8 @@ def get_pt_operator_registry_dict(
                    third_party("pocketfft"),
                    third_party("clog"),
                    third_party("FP16"),
+                   ROOT + ":torch_headers",
+                   ROOT + ":generated-autograd-headers",
                    C10,
                ] + ([ROOT + ":torch_mobile_train"] if train else []) +
                ([ROOT + ":flatbuffers_mobile"] if enable_flatbuffer else []),
@@ -946,8 +954,14 @@ def define_buck_targets(
         labels = labels,
         visibility = ["PUBLIC"],
         deps = [
+            "//third_party:python_headers",
             ":generated-version-header",
+            third_party("pybind"),
         ],
+        exported_deps = [
+            "//third_party:onnx_headers",
+            ":generated-autograd-headers",
+        ]
     )
 
     cxx_library(
@@ -1440,6 +1454,7 @@ def define_buck_targets(
             ":generated-autograd-headers",
             ":torch_headers",
             ":torch_mobile_deserialize",
+            ":caffe2_serialize",
             third_party("glog"),
             third_party("rt"),
             third_party("XNNPACK"),
@@ -1476,6 +1491,7 @@ def define_buck_targets(
             ":torch_core",
             ":torch_mobile_deserialize",
             ":torch_mobile_train",
+            ":generated-autograd-headers",
             C10,
         ],
     )
@@ -1525,12 +1541,23 @@ def define_buck_targets(
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
         visibility = ["PUBLIC"],
+        link_style = "static",
         deps = [
             # This is to have autograd profiler available
             # in xplat/caffe2:torch which some builds are using
             # notable xplate/facegen:testsAndroid
             ":torch_headers",
             ":torch_kineto_profiling",
+            "//third_party:libkineto",
+            third_party("flatbuffers-api"),
+            third_party("clog"),
+            third_party("glog"),
+            third_party("FP16"),
+            ":generated-aten-headers",
+            "//third_party:onnx",
+            third_party("XNNPACK"),
+            ":generated-autograd-headers",
+            ":caffe2_serialize",
         ],
         exported_deps = [
             ":aten_cpu",
@@ -1694,6 +1721,9 @@ def define_buck_targets(
             ":aten_cpu",
             ":torch_common",
         ],
+        deps = [
+            ":torch_headers",
+        ]
     )
 
     pt_xplat_cxx_library(
@@ -1715,6 +1745,7 @@ def define_buck_targets(
         deps = [
             third_party("glog"),
             third_party("kineto"),
+            ":torch_headers"
         ],
         exported_deps = [
             ":aten_cpu",
@@ -1925,10 +1956,16 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
         deps = [
             ":aten_cpu",
+            ":aten_native_cpu",
             ":caffe2_headers",
             ":torch_core",
+            ":torch_headers",
+            ":generated-autograd-headers",
             C10,
         ],
+        exported_deps = [
+            ":generated_aten_headers_cpu",
+        ]
     )
 
     # aten_cpu and aten_native_cpu
@@ -1959,10 +1996,15 @@ def define_buck_targets(
                 third_party("omp"),
                 third_party("cpuinfo"),
                 third_party("clog"),
+                ":caffe2_serialize",
                 third_party("FP16"),
                 third_party("glog"),
                 third_party("XNNPACK"),
+                "//third_party:operators",
+                "//third_party:subgraph",
                 third_party("pocketfft"),
+                ":pthreadpool",
+                ROOT_PATH + "aten/src/ATen/native/quantized/cpu/qnnpack:pytorch_qnnpack",
             ],
             compiler_flags = get_aten_compiler_flags(),
             exported_preprocessor_flags = get_aten_preprocessor_flags(),
@@ -1974,6 +2016,7 @@ def define_buck_targets(
                 ":generated_aten_headers_cpu",
                 ":jit_core_headers",
                 ":pthreadpool",
+                ":caffe2_serialize",
                 third_party("fmt"),
                 third_party("ruy"),
                 C10,
