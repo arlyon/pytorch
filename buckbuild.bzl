@@ -935,6 +935,7 @@ def define_buck_targets(
                 ("", "torch/csrc/**/*.h"),
                 ("", "torch/csrc/generic/*.cpp"),
                 ("", "torch/script.h"),
+                ("", "torch/extension.h"),
                 ("", "torch/library.h"),
                 ("", "torch/custom_class.h"),
                 ("", "torch/custom_class_detail.h"),
@@ -942,13 +943,6 @@ def define_buck_targets(
                 ("", "aten/src/ATen/*.h"),
                 ("", "aten/src/ATen/functorch/**/*.h"),
                 ("", "aten/src/ATen/quantized/*.h"),
-            ],
-            exclude = [
-                # Don't need on mobile.
-                "torch/csrc/Exceptions.h",
-                "torch/csrc/python_headers.h",
-                "torch/csrc/utils/auto_gil.h",
-                "torch/csrc/jit/serialization/mobile_bytecode_generated.h",
             ],
         ),
         labels = labels,
@@ -1010,6 +1004,7 @@ def define_buck_targets(
             "Functions.h": ":gen_aten_libtorch[autograd/generated/Functions.h]",
             "VariableType.h": ":gen_aten_libtorch[autograd/generated/VariableType.h]",
             "variable_factories.h": ":gen_aten_libtorch[autograd/generated/variable_factories.h]",
+            "python_functions.h": ":gen_aten_libtorch[autograd/generated/python_functions.h]",
             # Don't build python bindings on mobile.
             #"python_functions.h",
         },
@@ -1017,6 +1012,30 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
+
+    GENERATED_AUTOGRAD_PYTHON_HEADERS = {
+        "python_functions.h": ":gen_aten_libtorch[autograd/generated/python_functions.h]",
+    }
+
+    GENERATED_AUTOGRAD_PYTHON_CPP = [
+        ":gen_aten_libtorch[autograd/generated/python_functions_0.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_1.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_2.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_3.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_4.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_nn_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_nested_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_fft_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_linalg_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_return_types.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_enum_tag.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_sparse_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_special_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_0.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_1.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_2.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_variable_methods.cpp]",
+    ]
     cxx_library(
         name = "generated-version-header",
         header_namespace = "torch",
@@ -1529,10 +1548,17 @@ def define_buck_targets(
 
     pt_xplat_cxx_library(
         name = "torch",
-        srcs = [
-            "torch/csrc/jit/runtime/register_c10_ops.cpp",
-            "torch/csrc/jit/runtime/register_prim_ops_fulljit.cpp",
-        ],
+        srcs = sorted(
+            # torch_unpickler_common, + OVERLAPS W/ torch_mobile_deserialize_common
+            # core_sources_full, + torch_mobile_train
+            # core_trainer_sources, + OVERLAPS W/ 
+            # libtorch_profiler_sources, + OVERLAPS W/ torch_kineto_profiling
+            lazy_tensor_core_sources,
+        ) 
+        # + torch_cpp_srcs 
+        # + libtorch_extra_sources
+        + libtorch_core_jit_sources
+        + ["torch/csrc/utils/byte_order.cpp", "torch/csrc/jit/serialization/export.cpp"],
         compiler_flags = get_pt_compiler_flags(),
         exported_preprocessor_flags = get_pt_preprocessor_flags(),
         # torch brings in all sources neccessary to read and run a mobile module/jit module
@@ -1710,6 +1736,15 @@ def define_buck_targets(
             "torch/csrc/jit/backends/backend_debug_info.cpp",
             "torch/csrc/jit/backends/backend_interface.cpp",
         ],
+        headers = [
+            "torch/csrc/jit/backends/backend_debug_info.h",
+            "torch/csrc/jit/backends/backend_debug_handler.h",
+            "torch/csrc/jit/backends/backend_interface.h",
+            "torch/csrc/jit/backends/backend_detail.h",
+            "torch/csrc/jit/api/module.h",
+            "torch/csrc/autograd/variable.h",
+            "torch/csrc/utils/python_stub.h",
+        ],
         compiler_flags = get_pt_compiler_flags(),
         # @lint-ignore BUCKLINT link_whole
         link_whole = True,
@@ -1750,6 +1785,10 @@ def define_buck_targets(
         exported_deps = [
             ":aten_cpu",
             ":torch_common",
+        ],
+        headers = [
+            "torch/csrc/autograd/profiler_kineto.h",
+            "torch/csrc/profiler/api.h",
         ],
     )
 
@@ -1949,6 +1988,20 @@ def define_buck_targets(
             "torch/csrc/jit/runtime/static/passes.cpp",
             "torch/csrc/jit/runtime/static/te_wrapper.cpp",
         ],
+        headers = [
+            "torch/csrc/jit/runtime/static/passes.h",
+            "torch/csrc/jit/runtime/static/ops.h",
+            "torch/csrc/jit/ir/ir.h",
+            "torch/csrc/jit/ir/graph_node_list.h",
+            "torch/csrc/jit/api/module.h",
+            "torch/csrc/jit/ir/attributes.h",
+            "torch/csrc/jit/passes/inliner.h",
+            "torch/csrc/jit/runtime/static/impl.h",
+            "torch/csrc/jit/runtime/static/memory_planner.h",
+            "torch/csrc/jit/runtime/static/te_wrapper.h",
+            "torch/csrc/jit/runtime/static/fusion.h",
+            "torch/csrc/jit/tensorexpr/codegen.h",
+        ],
         compiler_flags = ["-fexceptions"],
         labels = labels,
         # @lint-ignore BUCKLINT link_whole
@@ -1982,6 +2035,7 @@ def define_buck_targets(
             ":gen_aten[core/TensorMethods.cpp]",
             # Needed by ATen/native/EmbeddingBag.cpp
             "caffe2/perfkernels/embedding_lookup_idx.cc",
+            "caffe2/perfkernels/embedding_lookup_fused_8bit_rowwise_idx_avx2.cc",
         ]),
         ("aten_native_cpu", aten_native_source_list),
     ]:
