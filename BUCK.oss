@@ -30,7 +30,8 @@ cxx_library(
 
 cxx_library(
     name = "caffe2_headers",
-    deps = ['//c10:c10'],
+    deps = ['//c10:c10', '//third_party:protobuf'],
+    exported_deps = ['//third_party:protobuf_headers', ":generated_aten_headers_cpu"],
     exported_headers = subdir_glob(
         [
             ("", "caffe2/**/*.h"),
