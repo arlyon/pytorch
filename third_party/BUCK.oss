@@ -22,6 +22,18 @@ cxx_library(
 )
 
 cxx_library(
+    name = "python_headers",
+    exported_linker_flags = [
+        "-L{}".format("/usr/lib64"),
+        "-lpython{}".format("3.10"),
+    ],
+    exported_preprocessor_flags = [
+        "-isystem{}".format("/usr/include/python3.10"),
+    ],
+    visibility = ["PUBLIC"],
+)
+
+cxx_library(
     name = "rt",
     exported_platform_linker_flags = [
         ("^linux-.*$", ["-lrt"]),
