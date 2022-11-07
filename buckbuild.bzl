@@ -2081,6 +2081,27 @@ def define_buck_targets(
         )
 
     cxx_library(
+        name = "missingdeps",
+        srcs = [
+            "aten/src/ATen/core/PythonFallbackKernel.cpp",
+            "aten/src/ATen/autocast_mode.cpp",
+            "aten/src/ATen/BatchedTensorImpl.cpp",
+            "aten/src/ATen/functorch/TensorWrapper.cpp",
+            "aten/src/ATen/functorch/DynamicLayer.cpp",
+            "aten/src/ATen/functorch/BatchedFallback.cpp",
+            "aten/src/ATen/functorch/BatchRulesHelper.cpp",
+        ],
+        deps = [
+            ":aten_header",
+            ":torch_headers",
+            ":generated_aten_headers_cpu",
+            ":generated-aten-headers",
+            C10,
+        ],
+        visibility = ["PUBLIC"]
+    )
+
+    cxx_library(
         name = "lean_runtime_with_flatbuffer",
         srcs = [
             "aten/src/ATen/core/DeprecatedTypePropertiesRegistry.cpp",
