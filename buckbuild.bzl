@@ -1036,6 +1036,23 @@ def define_buck_targets(
         ":gen_aten_libtorch[autograd/generated/python_torch_functions_2.cpp]",
         ":gen_aten_libtorch[autograd/generated/python_variable_methods.cpp]",
     ]
+
+    cxx_library(
+        name = "generated-autograd-python",
+        srcs = GENERATED_AUTOGRAD_PYTHON_CPP,
+        exported_headers = GENERATED_AUTOGRAD_PYTHON_HEADERS,
+        exported_deps = [
+            "//third_party:python_headers", 
+            ":torch_headers", 
+            ":aten_header", 
+            ":generated_aten_headers_cpu",
+            third_party("pybind"),
+            ":generated-autograd-headers",
+            C10
+        ],
+        visibility = ["PUBLIC"],
+    )
+
     cxx_library(
         name = "generated-version-header",
         header_namespace = "torch",
