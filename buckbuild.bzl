@@ -886,6 +886,16 @@ def define_buck_targets(
     )
 
     cxx_library(
+        name = "generated-aten-headers",
+        header_namespace = "",
+        exported_headers = {
+            "ATen/VmapGeneratedPlumbing.h": ":gen_aten[VmapGeneratedPlumbing.h]",
+        },
+        visibility = ["PUBLIC"],
+        labels = labels,
+    )
+
+    cxx_library(
         name = "aten_vulkan_header",
         header_namespace = "",
         exported_headers = subdir_glob([
