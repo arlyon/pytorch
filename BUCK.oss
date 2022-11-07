@@ -81,6 +81,12 @@ cxx_library(
         "//c10:c10",
         "//third_party:miniz",
     ],
+    compiler_flags = [
+        "-mavx",
+        "-mavx2",
+        "-mfma",
+        "-mf16c",
+    ]
 )
 
 pt_operator_library(

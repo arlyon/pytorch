@@ -221,8 +221,11 @@ _PT_COMPILER_FLAGS = [
 ATEN_COMPILER_FLAGS = [
     "-fexceptions",
     "-frtti",
-    "-fPIC",
     "-Os",
+    "-mavx",
+    "-mavx2",
+    "-mfma",
+    "-mf16c",
     "-Wno-absolute-value",
     "-Wno-deprecated-declarations",
     "-Wno-macro-redefined",
