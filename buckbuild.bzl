@@ -683,7 +683,7 @@ def gen_aten_libtorch_files(name, extra_params = [], compatible_with = [], apple
                "$(exe {}tools:generate_code_bin) ".format(ROOT_PATH) + " ".join(
             # Mobile build only needs libtorch - skip python bindings for now, except
             # for ovrsource, which needs Python bindings.
-            (["--subset libtorch"] if not is_arvr_mode() else []) + [
+            [
                 "--native-functions-path $(location {}:aten_src_path)/aten/src/ATen/native/native_functions.yaml".format(ROOT),
                 "--tags-path $(location {}:aten_src_path)/aten/src/ATen/native/tags.yaml".format(ROOT),
                 "--install_dir $OUT",
