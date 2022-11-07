@@ -1577,7 +1577,8 @@ def define_buck_targets(
         + libtorch_core_jit_sources
         + ["torch/csrc/utils/byte_order.cpp", "torch/csrc/jit/serialization/export.cpp"],
         compiler_flags = get_pt_compiler_flags(),
-        exported_preprocessor_flags = get_pt_preprocessor_flags(),
+        exported_preprocessor_flags = get_pt_preprocessor_flags() + ["-DONNX_NAMESPACE=onnx_torch",
+            "-DONNX_ML=1"],
         # torch brings in all sources neccessary to read and run a mobile module/jit module
         # link_whole is enabled so that all symbols linked
         # operators, registerations and other few symbols are need in runtime
