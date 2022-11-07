@@ -280,7 +280,7 @@ cxx_library(
             "ruy/ruy/benchmark.cc",
         ],
     ),
-    compiler_flags = ["-Os"],
+    compiler_flags = ["-Os", "-mavx"],
     preferred_linkage = "static",
     public_include_directories = ["ruy"],
     raw_headers = glob(["ruy/**/*.h"]),
