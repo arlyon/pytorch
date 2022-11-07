@@ -98,7 +98,7 @@ cxx_toolchain = rule(
     impl=_cxx_toolchain,
     attrs={
         "make_comp_db": attrs.dep(providers=[RunInfo], default=DEFAULT_MAKE_COMP_DB),
-        "link_style": attrs.string(default="shared"),
+        "link_style": attrs.string(default="static"),
     },
     is_toolchain_rule=True,
 )
