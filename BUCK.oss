@@ -6,6 +6,8 @@ load(
 load(":buckbuild.bzl",
     "define_buck_targets",
     "get_pt_operator_registry_dict",
+    "third_party",
+    "pybind_extension",
 )
 
 load(
@@ -138,6 +140,15 @@ cxx_library(
         "//c10:c10",
     ]
 )
+
+pybind_extension(
+    name = "_C",
+    srcs = ["torch/csrc/stub.c"],
+    deps = [
+        ":torch_python",
+    ],
+)
+
 cxx_binary(
     name = 'ptmobile_benchmark',
     srcs = [
