@@ -151,6 +151,43 @@ cxx_library(
     ]
 )
 
+cxx_binary(
+    name="test",
+    srcs = ["main.cpp"],
+    link_style = "static",
+    deps=[
+        "//third_party:cpuinfo",
+        ":torch",
+        ":torch_headers",
+        ":caffe2_serialize",
+        ":generated-autograd-headers"
+    ]
+)
+
+cxx_binary(
+    name="test_aten",
+    srcs = ["main.cpp"],
+    link_style = "static",
+    deps=[
+        ":torch_headers",
+        ":torch",
+        ":aten_native_cpu",
+        ":pthreadpool",
+        "//third_party:pthreadpool",
+    ],
+    preprocessor_flags = ['-DUSE_INTERNAL_PTHREADPOOL_IMPL'],
+)
+
+cxx_binary(
+    name="test_py",
+    srcs = ["main_py.cpp"],
+    deps=[
+        ":torch_python",
+        third_party("pybind"),
+        "//third_party:python_headers",
+    ]
+)
+
 pybind_extension(
     name = "_C",
     srcs = ["torch/csrc/stub.c"],
