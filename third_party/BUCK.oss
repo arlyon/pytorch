@@ -1,14 +1,20 @@
 load("//third_party:glog.buck.bzl", "define_glog")
 load("//third_party:xnnpack.buck.bzl", "define_xnnpack")
+load("//third_party:onnx.buck.bzl", "define_onnx")
+load("//third_party:protobuf.buck.bzl", "define_protobuf")
 load("//third_party:kineto.buck.bzl", "define_kineto")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//:buckbuild.bzl", "third_party")
 
 define_glog()
 
+define_protobuf()
+
 define_xnnpack(third_party)
 
 define_kineto()
+
+define_onnx()
 
 # a placeholder for libraries that are not implemented in OSS
 cxx_library(

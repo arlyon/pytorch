@@ -141,6 +141,8 @@ THIRD_PARTY_LIBS = {
     "pybind": [None, "//third_party:pybind"],
     "python_headers": [None, "//third_party:python_headers"],
     "pocketfft": ["//third-party/pocket_fft:pocketfft", "//third_party:pocketfft_header"],
+    "onnx": [None, "//third_party:onnx"],
+    "protobuf": [None, "//third_party:protobuf"],
     "psimd": ["//xplat/third-party/psimd:psimd", "//third_party:psimd"],
     "pthreadpool": ["//xplat/third-party/pthreadpool:pthreadpool", "//third_party:pthreadpool"],
     "pthreadpool_header": ["//xplat/third-party/pthreadpool:pthreadpool_header", "//third_party:pthreadpool_header"],
