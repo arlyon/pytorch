@@ -57,7 +57,7 @@ cxx_library(
             "caffe2/mobile/contrib/snpe/**/*.h",
             "caffe2/mobile/fb/qpl/jni/QuickPerformanceLogger.h",
             "caffe2/share/fb/x3d/ldi/*.h",
-            "**/*.pb.h",
+            # "**/*.pb.h", this is needed since caffe2_pb.h is included
         ],
     ),
     compiler_flags = ['-Os', '-fexceptions', '-frtti', '-Wno-shadow', '-Wno-unknown-pragmas', '-Wno-unused-variable', '-Wno-sign-compare', '-Icaffe2', '-Imodules', '-DEIGEN_NO_DEBUG', '-DCAFFE2_USE_LITE_PROTO', '-DCAFFE2_USE_GOOGLE_GLOG', '-DCAFFE2_RNN_NO_TEXT_FORMAT', '-DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK=1', '-DCAFFE2_IS_XPLAT_BUILD', '-DSTRIP_ERROR_MESSAGES', '-DUSE_INTERNAL_PTHREADPOOL_IMPL', '-DCAFFE2_USE_HPTT'],
