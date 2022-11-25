@@ -154,3 +154,6 @@
 [submodule "third_party/cutlass"]
 	path = third_party/cutlass
 	url = https://github.com/NVIDIA/cutlass.git
+[submodule "prelude"]
+	path = prelude
+	url = https://github.com/facebookincubator/buck2-prelude.git
