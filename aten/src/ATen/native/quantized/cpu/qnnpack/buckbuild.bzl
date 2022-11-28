@@ -328,10 +328,10 @@ def define_qnnpack(third_party, labels = []):
             ":ukernels_ssse3",
             third_party("cpuinfo"),
             third_party("pthreadpool"),
-            third_party("FP16"),
             third_party("FXdiv"),
         ],
         exported_deps = [
+            third_party("FP16"),
             third_party("clog"),
             third_party("cpuinfo"),
         ],
@@ -634,6 +634,9 @@ def define_qnnpack(third_party, labels = []):
                     "-pthread",
                 ],
             ),
+        ],
+        linker_flags = [
+            "-lm"
         ],
         env = {
             # These tests fail in sandcastle since they leak memory. Disable LeakSanitizer.
