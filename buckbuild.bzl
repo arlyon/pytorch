@@ -1008,6 +1008,41 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
+
+    fb_xplat_cxx_library(
+        name = "generated-autograd-python",
+        srcs = [
+            ":gen_aten_libtorch[autograd/generated/python_functions_0.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_functions_1.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_functions_2.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_functions_3.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_functions_4.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_nn_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_nested_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_fft_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_linalg_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_return_types.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_enum_tag.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_sparse_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_special_functions.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_torch_functions_0.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_torch_functions_1.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_torch_functions_2.cpp]",
+            ":gen_aten_libtorch[autograd/generated/python_variable_methods.cpp]",
+        ],
+        deps = [
+            ":torch_headers", 
+            third_party("python_headers"),
+            ":aten_header",
+            ":generated_aten_headers_cpu",
+            "//c10:c10",
+            third_party("pybind"),
+            ":torch_headers",
+        ],
+        labels = labels,
+        visibility = ["PUBLIC"],
+    )
+
     fb_xplat_cxx_library(
         name = "generated-version-header",
         header_namespace = "torch",

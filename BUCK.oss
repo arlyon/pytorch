@@ -130,6 +130,7 @@ cxx_library(
         ":caffe2_serialize",
         ":shm",
         "//third_party:libkineto",
+        ":generated-autograd-python",
     ],
     exported_deps = [
         ":generated-autograd-headers",
