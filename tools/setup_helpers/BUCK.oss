@@ -1,0 +1,9 @@
+python_binary(
+    name = "generate_code",
+    main = "generate_code.py",
+    deps = [
+        "//tools/autograd:autograd",
+        "//torchgen:torchgen",
+    ],
+    visibility = ["PUBLIC"],
+)
