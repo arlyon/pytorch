@@ -481,6 +481,7 @@ def gen_aten_files(
         outs = get_aten_generated_files(backends),
         cmd = "$(exe {}torchgen:gen) ".format(ROOT_PATH) + " ".join([
             "--source-path $(location {}:aten_src_path)/aten/src/ATen".format(ROOT),
+            "--per-operator-headers",
             "--install_dir $OUT",
         ] + extra_params),
         visibility = visibility,
