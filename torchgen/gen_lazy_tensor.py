@@ -553,7 +553,7 @@ def run_gen_lazy_tensor(
                     "vector",
                 ]
             ],
-            "lazy_ir_inc": [f'#include "{node_base_hdr}"']
+            "lazy_ir_inc": [f'#include <{node_base_hdr}>']
             if node_base_hdr is not None
             else [],
             "ir_declarations": list(

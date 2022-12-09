@@ -131,6 +131,11 @@ def get_generate_code_bin_outs():
         "autograd/generated/VariableType_3.cpp": ["autograd/generated/VariableType_3.cpp"],
         "autograd/generated/VariableType_4.cpp": ["autograd/generated/VariableType_4.cpp"],
         "autograd/generated/variable_factories.h": ["autograd/generated/variable_factories.h"],
+
+
+        "torch/csrc/lazy/generated/LazyIr.h": ["lazy/generated/LazyIr.h"],
+        "torch/csrc/lazy/generated/LazyNonNativeIr.h": ["lazy/generated/LazyNonNativeIr.h"],
+        "torch/csrc/lazy/generated/LazyNativeFunctions.h": ["lazy/generated/LazyNativeFunctions.h"],
     }
 
     if is_arvr_mode():

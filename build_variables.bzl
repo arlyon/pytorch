@@ -1061,6 +1061,7 @@ aten_cpu_source_non_codegen_list = [
     "aten/src/ATen/ThreadLocalState.cpp",
     "aten/src/ATen/FuncTorchTLS.cpp",
     "aten/src/ATen/Utils.cpp",
+    "aten/src/ATen/autocast_mode.cpp",
     "aten/src/ATen/Version.cpp",
     "aten/src/ATen/VmapMode.cpp",
     "aten/src/ATen/VmapTransforms.cpp",

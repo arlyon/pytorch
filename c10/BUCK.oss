@@ -37,7 +37,6 @@ cxx_library(
         '-DC10_USE_GLOG',
         '-DC10_USE_MINIMAL_GLOG',
         '-DC10_DISABLE_NUMA',
-        '-DC10_MOBILE',
         '-fexceptions',
         '-Wno-global-constructors'
     ],

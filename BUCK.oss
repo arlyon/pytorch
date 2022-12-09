@@ -56,7 +56,8 @@ cxx_library(
             "caffe2/mobile/contrib/snpe/**/*.h",
             "caffe2/mobile/fb/qpl/jni/QuickPerformanceLogger.h",
             "caffe2/share/fb/x3d/ldi/*.h",
-            "**/*.pb.h",
+            # todo(arlyon): generate these headers
+            # "**/*.pb.h",
         ],
     ),
     compiler_flags = ['-Os', '-fexceptions', '-frtti', '-Wno-shadow', '-Wno-unknown-pragmas', '-Wno-unused-variable', '-Wno-sign-compare', '-Icaffe2', '-Imodules', '-DEIGEN_NO_DEBUG', '-DCAFFE2_USE_LITE_PROTO', '-DCAFFE2_USE_GOOGLE_GLOG', '-DCAFFE2_RNN_NO_TEXT_FORMAT', '-DGEMMLOWP_ALLOW_SLOW_SCALAR_FALLBACK=1', '-DCAFFE2_IS_XPLAT_BUILD', '-DSTRIP_ERROR_MESSAGES', '-DUSE_INTERNAL_PTHREADPOOL_IMPL', '-DCAFFE2_USE_HPTT'],
@@ -98,6 +99,7 @@ cxx_library(
     name = "pt_ops_full",
     **get_pt_operator_registry_dict(
         name = "pt_ops_full",
+        train = True,
         deps = [
             ":torch_mobile_ops_full_dev",
         ],
@@ -116,7 +118,30 @@ cxx_library(
 
 cxx_library(
     name = "torch_python",
-    srcs = libtorch_python_core_sources,
+    srcs = libtorch_python_core_sources + [
+        ":gen_aten_libtorch[autograd/generated/python_functions_0.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_1.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_2.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_3.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_functions_4.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_nn_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_nested_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_fft_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_linalg_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_return_types.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_enum_tag.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_sparse_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_special_functions.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_0.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_1.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_torch_functions_2.cpp]",
+        ":gen_aten_libtorch[autograd/generated/python_variable_methods.cpp]",
+    ] + [
+        "aten/src/ATen/core/PythonFallbackKernel.cpp",
+        "aten/src/ATen/core/PythonOpRegistrationTrampoline.cpp",
+        "torch/csrc/utils/out_types.cpp",
+    ] + glob(["aten/src/ATen/functorch/*.cpp"]),
+    link_style = "static",
     headers = subdir_glob([
         ("", "torch/csrc/utils/*.h")
     ]
@@ -126,14 +151,16 @@ cxx_library(
         third_party("pybind"),
         third_party("python_headers"),
         third_party("onnx"),
-        ":torch",
+        third_party("onnx_proto"),
         ":caffe2_serialize",
+        ":torch_cpp_cpu",
         ":shm",
         "//third_party:libkineto",
-        ":generated-autograd-python",
+        ":torch_core",
     ],
     exported_deps = [
         ":generated-autograd-headers",
+        ":static_runtime",
         ":generate-version-header",
         ":caffe2_headers",
         ":aten_header",

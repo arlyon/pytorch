@@ -15,6 +15,8 @@ except ImportError:
 NATIVE_FUNCTIONS_PATH = "aten/src/ATen/native/native_functions.yaml"
 TAGS_PATH = "aten/src/ATen/native/tags.yaml"
 
+print(sys.path)
+
 
 def generate_code(
     gen_dir: pathlib.Path,
@@ -131,6 +133,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Autogenerate code")
     parser.add_argument("--native-functions-path")
     parser.add_argument("--tags-path")
+    parser.add_argument("--torch-path")
     parser.add_argument(
         "--gen-dir",
         type=pathlib.Path,
@@ -195,9 +198,10 @@ def main() -> None:
     )
 
     if options.gen_lazy_ts_backend:
+        torch_path = options.torch_path or "torch"
         aten_path = os.path.dirname(os.path.dirname(options.native_functions_path))
         ts_backend_yaml = os.path.join(aten_path, "native/ts_native_functions.yaml")
-        ts_native_functions = "torch/csrc/lazy/ts_backend/ts_native_functions.cpp"
+        ts_native_functions = os.path.join(torch_path, "csrc/lazy/ts_backend/ts_native_functions.cpp")
         ts_node_base = "torch/csrc/lazy/ts_backend/ts_node.h"
         install_dir = options.install_dir or os.fspath(options.gen_dir / "torch/csrc")
         lazy_install_dir = os.path.join(install_dir, "lazy/generated")
@@ -220,6 +224,7 @@ def main() -> None:
             dry_run=False,
             impl_path=ts_native_functions,
             node_base="TsNode",
+            shape_inference_hdr=os.path.join(torch_path, "csrc/lazy/core/shape_inference.h"),
             node_base_hdr=ts_node_base,
             build_in_tree=True,
             lazy_ir_generator=GenTSLazyIR,

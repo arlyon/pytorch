@@ -1703,7 +1703,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         labels = labels,
         preferred_linkage = "static",
         visibility = ["PUBLIC"],
-        deps = [
+        exported_deps = [
             ":ukernels_avx",
             ":ukernels_avx2",
             ":ukernels_avx512",
@@ -1817,6 +1817,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         ]),
         platforms = (APPLE, ANDROID, CXX, WINDOWS),
         preferred_linkage = "static",
+        link_style = "static",
         preprocessor_flags = [
             "-DXNN_LOG_LEVEL=0",
             "-DXNN_NO_Q8_OPERATORS",

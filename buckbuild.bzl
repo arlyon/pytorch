@@ -15,13 +15,16 @@ load("//tools/build_defs/windows:windows_flag_map.bzl", "windows_convert_gcc_cla
 load(
     ":build_variables.bzl",
     "aten_cpu_source_list",
+    "lazy_tensor_ts_sources",
     "aten_native_source_list",
     "core_sources_common",
     "core_sources_full_mobile_no_backend_interface",
     "core_trainer_sources",
     "jit_core_headers",
+    "lazy_tensor_core_sources",
     "jit_core_sources",
     "libtorch_profiler_sources",
+    "jit_sources_full",
     "torch_cpp_srcs",
     "torch_mobile_tracer_sources",
 )
@@ -144,6 +147,7 @@ THIRD_PARTY_LIBS = {
     "python_headers": [None, "//third_party:python_headers"],
     "pocketfft": ["//third-party/pocket_fft:pocketfft", "//third_party:pocketfft_header"],
     "onnx": [None, "//third_party:onnx"],
+    "onnx_proto": [None, "//third_party:onnx_proto_headers"],
     "protobuf": [None, "//third_party:protobuf"],
     "psimd": ["//xplat/third-party/psimd:psimd", "//third_party:psimd"],
     "pthreadpool": ["//xplat/third-party/pthreadpool:pthreadpool", "//third_party:pthreadpool"],
@@ -193,6 +197,7 @@ def pybind_extension(
         # linkopts = linkopts,
         # tags = tags,
         deps = deps + PYBIND_DEPS,
+        link_style = "static",
         **kwargs
     )
 
@@ -242,7 +247,6 @@ def get_aten_compiler_flags():
     return ATEN_COMPILER_FLAGS
 
 _COMMON_PREPROCESSOR_FLAGS = [
-    "-DC10_MOBILE",
     "-DNO_EXPORT",
 ] + (
     ["-DC10_MOBILE_TRIM_DISPATCH_KEYS"] if get_enable_mobile_dispatch_keys_trimming() else []
@@ -266,6 +270,7 @@ def get_aten_preprocessor_flags():
         "-DUSE_PYTORCH_METAL",
         "-DUSE_PYTORCH_QNNPACK",
         "-DUSE_XNNPACK",
+        "-DHAVE_MMAP",
         "-DPYTORCH_QNNPACK_RUNTIME_QUANTIZATION",
         "-DAT_PARALLEL_OPENMP_FBXPLAT=0",
         "-DAT_PARALLEL_NATIVE_FBXPLAT=1",
@@ -895,22 +900,9 @@ def define_buck_targets(
             ("aten/src", "ATen/native/mkl/*.h"),
             ("aten/src", "ATen/native/mkldnn/*.h"),
         ]),
-        exported_deps = ["//third_party:interface"], # xnnpack headers
+        exported_deps = ["//third_party:interface", "//third_party:ideep"],
         visibility = ["PUBLIC"],
         labels = labels,
-    )
-
-    fb_xplat_cxx_library(
-        name = "aten_vulkan_header",
-        header_namespace = "",
-        exported_headers = subdir_glob([
-            ("aten/src", "ATen/native/vulkan/*.h"),
-            ("aten/src", "ATen/native/vulkan/api/*.h"),
-            ("aten/src", "ATen/native/vulkan/ops/*.h"),
-            ("aten/src", "ATen/vulkan/*.h"),
-        ]),
-        labels = labels,
-        visibility = ["PUBLIC"],
     )
 
     fb_xplat_cxx_library(
@@ -939,17 +931,13 @@ def define_buck_targets(
                 ("", "aten/src/ATen/quantized/*.h"),
             ],
             exclude = [
-                # Don't need on mobile.
-                "torch/csrc/utils/auto_gil.h",
                 "torch/csrc/jit/serialization/mobile_bytecode_generated.h",
             ],
         ),
         labels = labels,
         visibility = ["PUBLIC"],
-        deps = [
-            ":generated-version-header",
-        ],
         exported_deps = [
+            ":generated-version-header",
             "//third_party:onnx_headers",
             ":generated-autograd-headers"
         ]
@@ -1001,44 +989,20 @@ def define_buck_targets(
             "Functions.h": ":gen_aten_libtorch[autograd/generated/Functions.h]",
             "VariableType.h": ":gen_aten_libtorch[autograd/generated/VariableType.h]",
             "variable_factories.h": ":gen_aten_libtorch[autograd/generated/variable_factories.h]",
-            # Don't build python bindings on mobile.
-            #"python_functions.h",
+            "python_functions.h": ":gen_aten_libtorch[autograd/generated/python_functions.h]",
         },
         labels = labels,
         visibility = ["PUBLIC"],
     )
 
-
     fb_xplat_cxx_library(
-        name = "generated-autograd-python",
-        srcs = [
-            ":gen_aten_libtorch[autograd/generated/python_functions_0.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_functions_1.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_functions_2.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_functions_3.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_functions_4.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_nn_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_nested_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_fft_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_linalg_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_return_types.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_enum_tag.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_sparse_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_special_functions.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_torch_functions_0.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_torch_functions_1.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_torch_functions_2.cpp]",
-            ":gen_aten_libtorch[autograd/generated/python_variable_methods.cpp]",
-        ],
-        deps = [
-            ":torch_headers", 
-            third_party("python_headers"),
-            ":aten_header",
-            ":generated_aten_headers_cpu",
-            "//c10:c10",
-            third_party("pybind"),
-            ":torch_headers",
-        ],
+        name = "generated-lazy-headers",
+        header_namespace = "torch/csrc/lazy/generated",
+        exported_headers = {
+            "LazyIr.h": ":gen_aten_libtorch[torch/csrc/lazy/generated/LazyIr.h]",
+            "LazyNativeFunctions.h": ":gen_aten_libtorch[torch/csrc/lazy/generated/LazyNativeFunctions.h]",
+            "LazyNonNativeIr.h": ":gen_aten_libtorch[torch/csrc/lazy/generated/LazyNonNativeIr.h]",
+        },
         labels = labels,
         visibility = ["PUBLIC"],
     )
@@ -1078,7 +1042,11 @@ def define_buck_targets(
         name = "aten_src_path",
         srcs = [
             "aten/src/ATen/native/native_functions.yaml",
+            "aten/src/ATen/native/ts_native_functions.yaml",
             "aten/src/ATen/native/tags.yaml",
+            "torch/csrc/lazy/ts_backend/ts_native_functions.cpp",
+            "torch/csrc/lazy/ts_backend/ts_node.h",
+            "torch/csrc/lazy/core/shape_inference.h",
             # @lint-ignore BUCKRESTRICTEDSYNTAX
         ] + glob(["aten/src/ATen/templates/*"]),
         visibility = [
@@ -1172,7 +1140,11 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
     )
 
-    gen_aten_libtorch_files(name = "gen_aten_libtorch")
+    gen_aten_libtorch_files(name = "gen_aten_libtorch", extra_params = [
+        "--gen_lazy_ts_backend", 
+        "--torch-path", 
+        "$(location {}:aten_src_path)/torch".format(ROOT)
+    ])
 
     gen_aten_libtorch_files(
         name = "gen_aten_libtorch_lite",
@@ -1203,6 +1175,7 @@ def define_buck_targets(
             "core/TensorBody.h": ":gen_aten[core/TensorBody.h]",
             "core/aten_interned_strings.h": ":gen_aten[core/aten_interned_strings.h]",
             "core/enum_tag.h": ":gen_aten[core/enum_tag.h]",
+            "VmapGeneratedPlumbing.h": ":gen_aten[VmapGeneratedPlumbing.h]",
         }),
         labels = labels,
     )
@@ -1473,7 +1446,7 @@ def define_buck_targets(
 
     pt_xplat_cxx_library(
         name = "torch_core",
-        srcs = core_sources_full_mobile_no_backend_interface + [
+        srcs = core_sources_full_mobile_no_backend_interface + lazy_tensor_core_sources + lazy_tensor_ts_sources + [
             "torch/csrc/api/src/jit.cpp",
             "torch/csrc/jit/serialization/export_bytecode.cpp",
             "torch/csrc/jit/serialization/export_module.cpp",
@@ -1489,6 +1462,7 @@ def define_buck_targets(
             ":aten_cpu",
             ":backend_interface_lib",
             ":generated-autograd-headers",
+            ":generated-lazy-headers",
             ":torch_headers",
             ":torch_mobile_deserialize",
             third_party("glog"),
@@ -1566,7 +1540,21 @@ def define_buck_targets(
         srcs = [
             "torch/csrc/jit/runtime/register_c10_ops.cpp",
             "torch/csrc/jit/runtime/register_prim_ops_fulljit.cpp",
-        ],
+            "torch/csrc/utils/byte_order.cpp",
+                "torch/csrc/jit/serialization/onnx.cpp",
+    "torch/csrc/jit/serialization/export.cpp",
+    "torch/csrc/jit/serialization/export_bytecode.cpp",
+    "torch/csrc/jit/api/module_save.cpp",
+    "torch/csrc/jit/serialization/export_module.cpp",
+    "torch/csrc/jit/serialization/import_legacy.cpp",
+     # "torch/csrc/autograd/TraceTypeManual.cpp",
+     # "torch/csrc/autograd/VariableTypeManual.cpp",
+     # "torch/csrc/autograd/FunctionsManual.cpp",
+     # "torch/csrc/jit/codegen/fuser/cpu/fused_kernel.cpp",
+     "torch/csrc/jit/mobile/compatibility/backport.cpp",
+     # "torch/csrc/jit/mobile/compatibility/backport_manager.cpp",
+     "torch/csrc/jit/mobile/compatibility/model_compatibility.cpp",
+        ] + jit_sources_full,
         compiler_flags = get_pt_compiler_flags(),
         exported_preprocessor_flags = get_pt_preprocessor_flags(),
         # torch brings in all sources neccessary to read and run a mobile module/jit module
@@ -1981,6 +1969,7 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
         windows_preferred_linkage = "static" if is_arvr_mode() else None,
         deps = [
+            ":torch_headers",
             ":aten_cpu",
             ":caffe2_headers",
             ":torch_core",
@@ -1989,7 +1978,7 @@ def define_buck_targets(
     )
 
     # aten_cpu and aten_native_cpu
-    for name, srcs in [
+    for name, srcs, extra_deps in [
         ("aten_cpu", jit_core_sources + aten_cpu_source_list + [
             # Generated
             ":gen_aten[Functions.cpp]",
@@ -2002,8 +1991,8 @@ def define_buck_targets(
             ":gen_aten[core/TensorMethods.cpp]",
             # Needed by ATen/native/EmbeddingBag.cpp
             "caffe2/perfkernels/embedding_lookup_idx.cc",
-        ]),
-        ("aten_native_cpu", aten_native_source_list),
+        ], []),
+        ("aten_native_cpu", aten_native_source_list, [":aten_cpu"]),
     ]:
         fb_xplat_cxx_library(
             name = name,
@@ -2011,6 +2000,7 @@ def define_buck_targets(
             header_namespace = "",
             # @lint-ignore BUCKLINT
             link_whole = True,
+            link_style = "static",
             visibility = ["PUBLIC"],
             deps = [
                 third_party("omp"),
@@ -2018,7 +2008,7 @@ def define_buck_targets(
                 third_party("glog"),
                 third_party("XNNPACK"),
                 third_party("pocketfft"),
-            ],
+            ] ,
             compiler_flags = get_aten_compiler_flags(),
             exported_preprocessor_flags = get_aten_preprocessor_flags(),
             exported_deps = [
@@ -2032,9 +2022,13 @@ def define_buck_targets(
                 third_party("fmt"),
                 third_party("ruy"),
                 C10,
-                ROOT_PATH + "aten/src/ATen/native/quantized/cpu/qnnpack:pytorch_qnnpack",
+                "//aten/src/ATen/native/quantized/cpu/qnnpack:pytorch_qnnpack",
             ],
             labels = labels,
+            exported_linker_flags = [
+                "-lm",
+                "-ldl",
+            ],
             **aten_default_args
         )
 

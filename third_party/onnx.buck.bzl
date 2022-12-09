@@ -7,43 +7,35 @@ def define_onnx():
         name = "onnx",
         srcs = glob(
             [
-                "onnx/*.cc",
-                "onnx/common/*.cc",
-                "onnx/defs/*.cc",
-                "onnx/defs/controlflow/*.cc",
-                "onnx/defs/experiments/*.cc",
-                "onnx/defs/generator/*.cc",
-                "onnx/defs/logical/*.cc",
-                "onnx/defs/math/*.cc",
-                "onnx/defs/nn/*.cc",
-                "onnx/defs/object_detection/*.cc",
-                "onnx/defs/optional/*.cc",
-                "onnx/defs/quantization/*.cc",
-                "onnx/defs/reduction/*.cc",
-                "onnx/defs/rnn/*.cc",
-                "onnx/defs/sequence/*.cc",
-                "onnx/defs/tensor/*.cc",
-                "onnx/defs/traditionalml/*.cc",
-                "onnx/defs/training/defs.cc",
-                "onnx/shape_inference/*.cc",
-                "onnx/version_converter/*.cc",
+                "onnx/onnx/*.cc",
+                "onnx/onnx/common/*.cc",
+                "onnx/onnx/defs/*.cc",
+                "onnx/onnx/defs/controlflow/*.cc",
+                "onnx/onnx/defs/experiments/*.cc",
+                "onnx/onnx/defs/generator/*.cc",
+                "onnx/onnx/defs/logical/*.cc",
+                "onnx/onnx/defs/math/*.cc",
+                "onnx/onnx/defs/nn/*.cc",
+                "onnx/onnx/defs/object_detection/*.cc",
+                "onnx/onnx/defs/optional/*.cc",
+                "onnx/onnx/defs/quantization/*.cc",
+                "onnx/onnx/defs/reduction/*.cc",
+                "onnx/onnx/defs/rnn/*.cc",
+                "onnx/onnx/defs/sequence/*.cc",
+                "onnx/onnx/defs/tensor/*.cc",
+                "onnx/onnx/defs/traditionalml/*.cc",
+                "onnx/onnx/defs/training/defs.cc",
+                "onnx/onnx/shape_inference/*.cc",
+                "onnx/onnx/version_converter/*.cc",
             ],
             exclude = [
-                "onnx/cpp2py_export.cc",
+                "onnx/onnx/cpp2py_export.cc",
             ],
         ),
-        headers = glob([
-            "onnx/*.h",
-            "onnx/version_converter/*.h",
-            "onnx/common/*.h",
-            "onnx/defs/*.h",
-            "onnx/defs/tensor/*.h",
-            "onnx/shape_inference/*.h",
-            "onnx/version_converter/adapters/*.h",
-        ]),
         visibility = ["PUBLIC"],
         deps = [
             ":onnx_proto_lib",
+            ":onnx_headers",
         ],
         exported_preprocessor_flags = [
             "-DONNX_NAMESPACE=onnx_torch",
@@ -101,13 +93,19 @@ def define_onnx():
     cxx_library(
         name = "onnx_compiled_proto",
         header_namespace="onnx",
+        srcs = glob([
+            "onnx/compiled_proto/*.cc",
+        ]),
         exported_headers = subdir_glob([
             ("onnx/compiled_proto", "*_pb.h"),
-            ("onnx/compiled_proto", "*.pb.h")
+            ("onnx/compiled_proto", "*.pb.h"),
         ]),
         exported_preprocessor_flags = [
             "-DONNX_NAMESPACE=onnx_torch",
             "-DONNX_ML=1",
+        ],
+        exported_deps = [
+            "//third_party:protobuf",
         ]
     )
 
