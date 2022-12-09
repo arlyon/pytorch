@@ -127,6 +127,7 @@ cxx_library(
     ],
     exported_deps = [
         ":generated-autograd-headers",
+        ":generate-version-header",
         ":caffe2_headers",
         ":aten_header",
         ":aten_cpu",
