@@ -37,7 +37,7 @@ cxx_library(
 cxx_library(
     name = "ideep",
     header_namespace = "",
-    headers = subdir_glob([
+    exported_headers = subdir_glob([
         ("ideep/include", "**/*.h"),
         ("ideep/include", "*.h"),
         ("ideep/include", "**/*.hpp"),
