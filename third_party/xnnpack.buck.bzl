@@ -754,6 +754,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         srcs = (select({
             "DEFAULT": [],
             "ovr_config//os:macos-x86_64": PROD_XOP_MICROKERNEL_SRCS,
+            "ovr_config//os:linux": PROD_XOP_MICROKERNEL_SRCS,
         }) if is_arvr_mode() else []),
         headers = subdir_glob([
             ("XNNPACK/src", "**/*.h"),
@@ -839,6 +840,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         srcs = (select({
             "DEFAULT": [],
             "ovr_config//os:macos-x86_64": PROD_FMA3_MICROKERNEL_SRCS,
+            "ovr_config//os:linux": PROD_FMA3_MICROKERNEL_SRCS,
         }) if is_arvr_mode() else []),
         headers = subdir_glob([
             ("XNNPACK/src", "**/*.h"),
@@ -940,6 +942,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         srcs = (select({
             "DEFAULT": [],
             "ovr_config//os:macos-x86_64": PROD_AVX2_MICROKERNEL_SRCS,
+            "ovr_config//os:linux": PROD_AVX2_MICROKERNEL_SRCS,
         }) if is_arvr_mode() else []),
         headers = subdir_glob([
             ("XNNPACK/src", "**/*.c"),
@@ -1049,6 +1052,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         srcs = (select({
             "DEFAULT": [],
             "ovr_config//os:macos-x86_64": PROD_AVX512F_MICROKERNEL_SRCS,
+            "ovr_config//os:linux": PROD_AVX512F_MICROKERNEL_SRCS,
         }) if is_arvr_mode() else []),
         headers = subdir_glob([
             ("XNNPACK/src", "**/*.c"),
@@ -1134,6 +1138,7 @@ def define_xnnpack(third_party, labels = [], XNNPACK_WINDOWS_AVX512F_ENABLED = F
         srcs = (select({
             "DEFAULT": [],
             "ovr_config//os:macos-x86_64": PROD_AVX512SKX_MICROKERNEL_SRCS,
+            "ovr_config//os:linux": PROD_AVX512SKX_MICROKERNEL_SRCS,
         }) if is_arvr_mode() else []),
         headers = subdir_glob([
             ("XNNPACK/src", "**/*.c"),
