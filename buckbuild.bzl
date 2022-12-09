@@ -6,6 +6,8 @@ load("@prelude//:rules.bzl", "genrule", "filegroup", "cxx_library", "cxx_binary"
 load("//tools/build_defs:fbsource_utils.bzl", "is_arvr_mode")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 load("//tools/build_defs:platform_defs.bzl", "APPLETVOS", "IOS", "MACOSX")
+load("//tools/build_defs:fb_xplat_genrule.bzl", "fb_xplat_genrule")
+load("//tools/build_defs:fb_xplat_cxx_library.bzl", "fb_xplat_cxx_library")
 load("//tools/build_defs:type_defs.bzl", "is_list", "is_string")
 load("//tools/build_defs/android:build_mode_defs.bzl", is_production_build_android = "is_production_build")
 load("//tools/build_defs/apple:build_mode_defs.bzl", is_production_build_ios = "is_production_build")
@@ -576,7 +578,7 @@ def pt_operator_query_codegen(
     oplist_dir_name = name + "_pt_oplist"
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    fb_xplat_genrule(
         name = oplist_dir_name,
         cmd = ("$(exe {}tools:gen_oplist) ".format(ROOT_PATH) +
                "--model_file_list_path $(@query_outputs 'attrfilter(labels, pt_operator_library, deps(set({deps})))') " +
@@ -812,7 +814,7 @@ def define_buck_targets(
         c2_fbandroid_xplat_compiler_flags = [],
         labels = []):
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "metal_build_srcs",
         # @lint-ignore BUCKRESTRICTEDSYNTAX
         srcs = glob(METAL_SOURCE_LIST),
@@ -822,7 +824,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "templated_selective_build_srcs",
         # NB: no glob here, there are generated targets in this list!
         # @lint-ignore BUCKRESTRICTEDSYNTAX
@@ -1013,7 +1015,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    genrule(
         name = "generate-version-header",
         srcs = [
             "torch/csrc/api/include/torch/version.h.in",
@@ -1034,7 +1036,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.filegroup(
+    filegroup(
         name = "aten_src_path",
         srcs = [
             "aten/src/ATen/native/native_functions.yaml",
@@ -1065,7 +1067,7 @@ def define_buck_targets(
     )
 
     # @lint-ignore BUCKLINT
-    fb_native.genrule(
+    genrule(
         name = "generate_aten_config",
         srcs = [
             "aten/src/ATen/Config.h.in",
