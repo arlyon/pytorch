@@ -945,9 +945,9 @@ def define_buck_targets(
         visibility = ["PUBLIC"],
         deps = [
             ":generated-version-header",
-            third_party("onnx"),
         ],
         exported_deps = [
+            "//third_party:onnx_headers",
             ":generated-autograd-headers"
         ]
     )

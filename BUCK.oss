@@ -119,6 +119,7 @@ cxx_library(
     deps = [
         third_party("pybind"),
         third_party("python_headers"),
+        third_party("onnx"),
         ":torch",
         ":caffe2_serialize",
         ":shm",
