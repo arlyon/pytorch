@@ -35,6 +35,15 @@ cxx_library(
 )
 
 cxx_library(
+    name = "nnpack",
+    header_namespace = "",
+    exported_headers = {
+        "nnpack.h": "NNPACK/include/nnpack.h",
+    },
+    visibility = ["PUBLIC"],
+)
+
+cxx_library(
     name = "ideep",
     header_namespace = "",
     exported_headers = subdir_glob([
