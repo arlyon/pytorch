@@ -171,6 +171,7 @@ docs/source/scripts/quantization_backend_configs/
 *.pb.h
 *.pb.cc
 *_pb2.py
+!third_party/onnx_compiled_proto/*
 
 # Compiled python
 *.pyc
