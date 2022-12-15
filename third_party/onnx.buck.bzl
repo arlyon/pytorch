@@ -1,4 +1,4 @@
-load("@prelude//:rules.bzl", "genrule", "cxx_library", "cxx_binary")
+load("@prelude//:rules.bzl", "genrule", "cxx_library", "cxx_binary", "python_binary", "python_library")
 load("//tools/build_defs:glob_defs.bzl", "subdir_glob")
 
 def define_onnx():
@@ -72,10 +72,12 @@ def define_onnx():
             "onnx/*_pb.h",
             "onnx/*.pb.h",
         ]),
-        exported_headers = subdir_glob([
+        exported_headers = dict(subdir_glob([
             ("onnx", "onnx/*_pb.h"),
             ("onnx", "onnx/*.pb.h")
-        ]),
+        ]).items() + {
+            "onnx/onnx-ml.pb.h": ":generate_onnx_proto[onnx-ml.pb.h]",
+        }.items()),
         visibility = ["PUBLIC"],
         deps = [
             ":onnx_proto_lib",
@@ -112,4 +114,48 @@ def define_onnx():
     cxx_library(
         name = "onnx_proto_lib",
         # src = []
+    )
+
+    python_library(
+        name = "gen_proto_lib",
+        srcs = [
+            "onnx/onnx/onnx.in.proto",
+            "onnx/onnx/onnx-operators.in.proto",
+            "onnx/onnx/onnx-data.in.proto"
+        ],
+        visibility = ["PUBLIC"],
+    )
+
+
+    python_binary(
+        name = "gen_proto",
+        main = "onnx/onnx/gen_proto.py",
+        deps = [":gen_proto_lib"],
+    )
+
+    genrule(
+        name = "generate_onnx_proto",
+        outs = {
+            "onnx_onnx_torch-ml.proto": ["onnx_onnx_torch-ml.proto"],
+            "onnx-ml.pb.h": ["onnx-ml.pb.h"],
+        },
+        cmd = "$(location :gen_proto) -p onnx_torch -o $OUT onnx -m >/dev/null && sed -i 's/onnx_onnx_torch-ml.pb.h/onnx\\/onnx_onnx_torch-ml.pb.h/g' $OUT/onnx-ml.pb.h",
+    )
+
+    genrule(
+        name = "generate_onnx_operators_proto",
+        outs = {
+            "onnx-operators_onnx_torch-ml.proto": ["onnx-operators_onnx_torch-ml.proto"],
+            "onnx-operators-ml.pb.h": ["onnx-operators-ml.pb.h"],
+        },
+        cmd = "$(location :gen_proto) -p onnx_torch -o $OUT onnx-operators -m >/dev/null && sed -i 's/onnx-operators_onnx_torch-ml.pb.h/onnx\\/onnx-operators_onnx_torch-ml.pb.h/g' $OUT/onnx-operators-ml.pb.h",
+    )
+
+    genrule(
+        name = "generate_onnx_data_proto",
+        outs = {
+            "onnx-data_onnx_torch.proto": ["onnx-data_onnx_torch.proto"],
+            "onnx-data.pb.h": ["onnx-data.pb.h"],
+        },
+        cmd = "$(location :gen_proto) -p onnx_torch -o $OUT onnx-data -m >/dev/null && sed -i 's/onnx-data_onnx_torch.pb.h/onnx\\/onnx-data_onnx_torch.pb.h/g' $OUT/onnx-data.pb.h",
     )
