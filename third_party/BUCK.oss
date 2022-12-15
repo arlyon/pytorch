@@ -68,7 +68,6 @@ cxx_library(
         ]
     ),
     header_namespace = "",
-    srcs = ["pybind11/stub.cpp"],
     compiler_flags =  [
         "-fexceptions",
         # Useless warnings
