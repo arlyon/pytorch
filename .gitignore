@@ -172,6 +172,8 @@ docs/source/scripts/quantization_backend_configs/
 *.pb.cc
 *_pb2.py
 !third_party/onnx_compiled_proto/*
+!caffe2/proto/*.pb.h
+!caffe2/proto/*.pb.cc
 
 # Compiled python
 *.pyc
